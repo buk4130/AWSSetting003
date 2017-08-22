@@ -7,9 +7,15 @@ public class WaitingTicketJsonObject {
 	private int headCount;
 	private int isStaying;
 	private String phoneNumber;
+	private int ticketNumber;
 	
 	
-	
+	public int getTicketNumber() {
+		return ticketNumber;
+	}
+	public void setTicketNumber(int ticketNumber) {
+		this.ticketNumber = ticketNumber;
+	}
 	public String getName() {
 		return name;
 	}

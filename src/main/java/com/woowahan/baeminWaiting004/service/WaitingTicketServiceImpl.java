@@ -57,7 +57,15 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 	@Override
 	public WaitingTicket findByCreateTime(String creatTime) {
 		return waitingTicketRepository.findByCreateTime(creatTime);
+	}
+
+	@Override
+	public void updateTicketByTicketNum(WaitingTicket waitingTicket) {
+		//waitingTicketRepository.delete(ticketNumber);
+		//update
+		waitingTicketRepository.save(waitingTicket);
 	}	
 
+	
 	
 }

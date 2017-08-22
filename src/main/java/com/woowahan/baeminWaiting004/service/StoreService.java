@@ -14,4 +14,11 @@ public interface StoreService {
 	
 	//jw
 	Store getStoreId(String memberId);
+	
+	//jw
+	void addStore2(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId);
+	
+	void addStore3(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId, int storeId); 
 }
