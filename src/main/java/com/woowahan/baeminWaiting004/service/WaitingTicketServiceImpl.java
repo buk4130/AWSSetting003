@@ -15,7 +15,7 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 
 	@Override
 	public void addWaitingTicket(String name, int waitingListId, String memberId, int headCount, int isStaying,
-			String contactNumber) {
+			String contactNumber, String creatingTime) {
 		WaitingTicket waitingTicket = new WaitingTicket();
 		
 		waitingTicket.setName(name);
@@ -24,7 +24,7 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 		waitingTicket.setHeadCount(headCount);
 		waitingTicket.setIsStaying(isStaying);
 		waitingTicket.setContactNumber(contactNumber);
-		//waitingTicket.setCreateTime("now()");
+		waitingTicket.setCreateTime(creatingTime);
 		waitingTicketRepository.save(waitingTicket);
 	}
 
@@ -47,5 +47,11 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 	@Override
 	public List<WaitingTicket> getAllWaitingTicket() {
 		return waitingTicketRepository.findAll();
+	}
+
+	@Override
+	public WaitingTicket findByCreateTime(String creatTime) {
+		return waitingTicketRepository.findByCreateTime(creatTime);
 	}	
+	
 }

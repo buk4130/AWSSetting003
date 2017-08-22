@@ -29,6 +29,9 @@ public class WaitingTicket {
 	private String contactNumber;
 	@Column(name="create_time")
 	private String createTime;
+	@Column(name="deleted")
+	private int deleted;
+	
 	
 	public int getTicketNumber() {
 		return ticketNumber;
@@ -78,6 +81,11 @@ public class WaitingTicket {
 	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
-	
+	public int getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(int deleted) {
+		this.deleted = deleted;
+	}
 	
 }
