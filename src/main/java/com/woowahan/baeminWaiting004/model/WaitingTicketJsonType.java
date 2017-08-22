@@ -2,7 +2,6 @@ package com.woowahan.baeminWaiting004.model;
 
 public class WaitingTicketJsonType {
 	
-	private int ticketNumber;
 	private String memberId;
 	private int headCount;
 	private int isStaying;
@@ -10,12 +9,16 @@ public class WaitingTicketJsonType {
 	private String name;
 	private int waitingListId;
 	private String createTime;
+	private int ticketNumber;
+	private int isSuccess;	
+
 	public int getTicketNumber() {
 		return ticketNumber;
 	}
 	public void setTicketNumber(int ticketNumber) {
 		this.ticketNumber = ticketNumber;
 	}
+
 	public String getMemberId() {
 		return memberId;
 	}
@@ -58,6 +61,11 @@ public class WaitingTicketJsonType {
 	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
-	
-	
+	public int getIsSuccess() {
+		return isSuccess;
+	}
+	public void setIsSuccess(int isSuccess) {
+		this.isSuccess = isSuccess;
+	}
+
 }
