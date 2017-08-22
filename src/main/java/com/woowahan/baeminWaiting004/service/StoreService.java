@@ -11,4 +11,7 @@ public interface StoreService {
 	void addStore(String storeName, String storeTel, String storeAddress, 
 			String storeDescription, String storeLatitude, String storeLongitude, int storeIsOpened, String memberId,
 			String topLeftLat, String topLeftLong, String bottomLeftLat, String bottomLeftLong);
+	
+	//jw
+	Store getStoreId(String memberId);
 }

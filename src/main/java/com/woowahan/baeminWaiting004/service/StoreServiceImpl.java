@@ -39,4 +39,12 @@ public class StoreServiceImpl implements StoreService{
 		store.setMemberId(memberId);
 		storeRepository.save(store);
 	}
+
+
+	@Override
+	public Store getStoreId(String memberId) {
+		return storeRepository.findByMemberId(memberId);
+	}
+	
+	
 }

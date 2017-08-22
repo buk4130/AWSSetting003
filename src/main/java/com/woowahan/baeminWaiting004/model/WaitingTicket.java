@@ -31,7 +31,8 @@ public class WaitingTicket {
 	private String createTime;
 	@Column(name="deleted")
 	private int deleted;
-	
+
+
 	
 	public int getTicketNumber() {
 		return ticketNumber;

@@ -3,6 +3,7 @@ package com.woowahan.baeminWaiting004.controller;
 import java.io.IOException;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -19,6 +20,7 @@ import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonObject;
+import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
 import com.woowahan.baeminWaiting004.service.WaitingTicketService;
 
@@ -62,6 +64,41 @@ public class WaitingTicketController {
 		waitingTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
 		
 		return objectMapper.writeValueAsString(waitingTicketJsonType);
+	}
+	
+	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
+	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getWaitingTicketByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+		
+		//storeId == waitingListId
+		int waitingListId = waitingTicketJsonObject.getStoreId();
+		int deleted = 0;//유효한 티켓만 받아오
+		
+		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListIdAndDeleted(waitingListId, deleted);
+		
+		//결과값 제이슨으로 바꾸
+		List<WaitingTicketJsonType> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonType>();
+		for (WaitingTicket waitingTicket : waitingTicketList) {
+			WaitingTicketJsonType waitingTicketJsonObjectTemp = new WaitingTicketJsonType();
+			
+			waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
+			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
+			waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
+			waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
+			waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
+			waitingTicketJsonObjectTemp.setName(waitingTicket.getName());
+			waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
+			waitingTicketJsonObjectTemp.setCreateTime(waitingTicket.getCreateTime());
+			
+			waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
+		}
+
+		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
+		
 	}
 	
 //	@RequestMapping(value="/findByTicketNumber", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")

@@ -12,4 +12,6 @@ public interface WaitingTicketService {
 	List<WaitingTicket> findByMemberId(String memberId);
 	List<WaitingTicket> findByWaitingListId(int waitingListId);
 	List<WaitingTicket> getAllWaitingTicket();
+	List<WaitingTicket> findByWaitingListIdAndDeleted(int waitingListId, int deleted);
+	
 }

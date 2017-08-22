@@ -43,6 +43,11 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 	public List<WaitingTicket> findByWaitingListId(int waitingListId) {
 		return waitingTicketRepository.findByWaitingListId(waitingListId);
 	}
+	
+	@Override
+	public List<WaitingTicket> findByWaitingListIdAndDeleted(int waitingListId, int deleted) {
+		return waitingTicketRepository.findByWaitingListIdAndDeleted(waitingListId, deleted);
+	}
 
 	@Override
 	public List<WaitingTicket> getAllWaitingTicket() {
@@ -53,5 +58,6 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 	public WaitingTicket findByCreateTime(String creatTime) {
 		return waitingTicketRepository.findByCreateTime(creatTime);
 	}	
+
 	
 }
