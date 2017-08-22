@@ -56,7 +56,7 @@ public class WaitingTicketController {
 	}
 	
 	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
-	@RequestMapping(value="/getWaitingTicketByWaitingListId", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
 	public String getWaitingTicketByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
 		
