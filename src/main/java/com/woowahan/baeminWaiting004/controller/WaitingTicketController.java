@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import org.hibernate.action.internal.EntityIdentityInsertAction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
+import com.woowahan.baeminWaiting004.repository.WaitingListRepository;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
@@ -31,6 +33,10 @@ public class WaitingTicketController {
 	
 	@Autowired
 	private WaitingListService waitingListService;
+	
+	@Autowired
+	private WaitingListRepository waitingListRepository;
+
 	
 	//처음 대기표 받을때 기능(param: fk waitingListId, memberId 꼭 필요 ) 
 	@RequestMapping(value="/addWaitingTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
@@ -57,6 +63,7 @@ public class WaitingTicketController {
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
 		
 		waitingList.setCurrentInLine(waitingTickets.size());
+		waitingListRepository.save(waitingList);
 		
 		WaitingTicketJsonType waitingTicketJsonType = new WaitingTicketJsonType();
 		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);

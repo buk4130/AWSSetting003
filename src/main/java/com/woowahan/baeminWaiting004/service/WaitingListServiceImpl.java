@@ -32,4 +32,5 @@ public class WaitingListServiceImpl implements WaitingListService{
 		List<WaitingList> waitingLists = waitingListRepository.findAll();
 		return waitingLists;
 	}
+
 }
