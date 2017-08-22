@@ -32,6 +32,6 @@ public class SignUpController {
 		int userRole = signUpJsonObject.getUserMemberRole();
 		memberService.addMember(userId, userPassword, userMemberTel, userRole);
 		
-		return "{\"is_success\": 1}";
+		return "true";
 	}
 }

@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.woowahan.baeminWaiting004.model.Store;
 
 public interface StoreRepository extends JpaRepository<Store, Integer>{
-
+	
+	Store findByMemberId(String memberId);
 }

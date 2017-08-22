@@ -14,4 +14,6 @@ public interface WaitingTicketRepository extends JpaRepository<WaitingTicket, In
 	List<WaitingTicket> findByMemberId(String memberId);
 	List<WaitingTicket> findByWaitingListId(int waitingListId);
 	List<WaitingTicket> findByWaitingListIdAndDeleted(int waitingListId, int deleted);
+	WaitingTicket findByCreateTime(String creatTime);
+
 }

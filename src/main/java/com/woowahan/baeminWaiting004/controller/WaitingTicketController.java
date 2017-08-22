@@ -1,7 +1,10 @@
 package com.woowahan.baeminWaiting004.controller;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
+import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
@@ -43,20 +46,28 @@ public class WaitingTicketController {
 		int isStaying = waitingTicketJsonObject.getIsStaying();
 		String phoneNumber = waitingTicketJsonObject.getPhoneNumber();
 		String memberId = "";
-		waitingTicketService.addWaitingTicket(name, storeId, memberId, headCount, isStaying, phoneNumber);
+		
+		Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String creatingTime = dayTime.format(calendar.getTime());
+		
+		waitingTicketService.addWaitingTicket(name, storeId, memberId, headCount, isStaying, phoneNumber, creatingTime);
 		
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
-		System.out.println(waitingList.getCurrentInLine());
 		
 		waitingList.setCurrentInLine(waitingTickets.size());
-		System.out.println(waitingList.getCurrentInLine());
 		
-		return "{\"is_success\": 1}";
+		WaitingTicketJsonType waitingTicketJsonType = new WaitingTicketJsonType();
+		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
+		waitingTicketJsonType.setIsSuccess(1);
+		waitingTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+		
+		return objectMapper.writeValueAsString(waitingTicketJsonType);
 	}
 	
 	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
-	@RequestMapping(value="/getWaitingTicketByWaitingListId", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
 	public String getWaitingTicketByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
 		
@@ -89,6 +100,36 @@ public class WaitingTicketController {
 		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
 		
 	}
+	
+	//update ticket
+	@RequestMapping(value="/deleteTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String updateTicketByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+
+		int ticketNum = waitingTicketJsonObject.getTicketNumber();
+		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);
+		rWaitingTicket.setDeleted(1);
+		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
+		
+		return "true";
+	}
+	
+	//티켓넘버로 디테일 가져오기 
+	@RequestMapping(value="/waitingPerson", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getCustomerDetailByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+
+		int ticketNum = waitingTicketJsonObject.getTicketNumber();
+		
+		//
+		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);		
+		
+		return objectMapper.writeValueAsString(rWaitingTicket);
+	}	
 	
 //	@RequestMapping(value="/findByTicketNumber", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 //	@ResponseBody

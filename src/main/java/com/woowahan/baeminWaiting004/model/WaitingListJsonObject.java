@@ -4,6 +4,7 @@ public class WaitingListJsonObject {
 	private int storeId;
 	private int currentInLine;
 	private int waitingListId;
+	
 	public int getStoreId() {
 		return storeId;
 	}

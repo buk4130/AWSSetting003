@@ -39,4 +39,43 @@ public class StoreServiceImpl implements StoreService{
 		store.setMemberId(memberId);
 		storeRepository.save(store);
 	}
+
+
+	@Override
+	public Store getStoreId(String memberId) {
+		return storeRepository.findByMemberId(memberId);
+	}
+	
+	@Override
+	public void addStore2(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId) {
+		
+		Store store = new Store();
+		store.setTitle(storeName);
+		store.setTel(storeTel);
+		store.setAddress(storeAddress);
+		store.setDescription(storeDescription);
+		store.setLatitude(storeLatitude);
+		store.setLongitude(storeLongitude);		
+		store.setMemberId(memberId);
+
+		storeRepository.save(store);
+	}
+	
+	@Override
+	public void addStore3(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId, int storeId) {
+		
+		Store store = new Store();
+		store.setTitle(storeName);
+		store.setTel(storeTel);
+		store.setAddress(storeAddress);
+		store.setDescription(storeDescription);
+		store.setLatitude(storeLatitude);
+		store.setLongitude(storeLongitude);		
+		store.setMemberId(memberId);
+		store.setId(storeId);
+		
+		storeRepository.save(store);
+	}
 }
