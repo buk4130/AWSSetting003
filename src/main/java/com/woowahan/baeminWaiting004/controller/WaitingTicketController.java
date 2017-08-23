@@ -62,6 +62,7 @@ public class WaitingTicketController {
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
 		
+		System.out.println(waitingTickets.size());
 		waitingList.setCurrentInLine(waitingTickets.size());
 		waitingListRepository.save(waitingList);
 		
