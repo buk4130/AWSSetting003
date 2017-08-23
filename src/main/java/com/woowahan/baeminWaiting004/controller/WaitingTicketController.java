@@ -142,7 +142,18 @@ public class WaitingTicketController {
 		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);		
 		
 		return objectMapper.writeValueAsString(rWaitingTicket);
-	}	
+	}
+	
+	public void deleteAllWaitingTicket(int storeId) throws Exception{
+		List<WaitingTicket> arr = waitingTicketService.findByWaitingListId(storeId);
+		
+		for(WaitingTicket w : arr) {
+			w.setDeleted(1);
+			waitingTicketService.updateTicketByTicketNum(w);
+		}
+		
+	}
+	
 	
 //	@RequestMapping(value="/findByTicketNumber", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 //	@ResponseBody
