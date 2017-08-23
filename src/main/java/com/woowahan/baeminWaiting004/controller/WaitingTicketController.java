@@ -76,7 +76,7 @@ public class WaitingTicketController {
 		
 		CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
 		
-		return objectMapper.writeValueAsString(waitingTicketJsonType);
+		return objectMapper.writeValueAsString(waitingList);
 	}
 	
 	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 

@@ -61,7 +61,7 @@ public class SignInController {
 			Algorithm algorithm = Algorithm.HMAC256(member.getMemberId());
 			token = JWT.create().withIssuer("auth0").sign(algorithm);
 			
-			Store rStore = storeService.getStoreId(userId);
+			Store rStore = storeService.getStore(userId);
 			if( rStore != null) {
 				storeId = rStore.getId();
 			}

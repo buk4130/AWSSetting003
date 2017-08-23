@@ -42,12 +42,12 @@ public class StoreServiceImpl implements StoreService{
 
 
 	@Override
-	public Store getStoreId(String memberId) {
+	public Store getStoreInfoByMemberId(String memberId) {
 		return storeRepository.findByMemberId(memberId);
 	}
 	
 	@Override
-	public void addStore2(String storeName, String storeTel, String storeAddress, String storeDescription,
+	public void firstAddStore(String storeName, String storeTel, String storeAddress, String storeDescription,
 			String storeLatitude, String storeLongitude, String memberId) {
 		
 		Store store = new Store();
@@ -63,8 +63,8 @@ public class StoreServiceImpl implements StoreService{
 	}
 	
 	@Override
-	public void addStore3(String storeName, String storeTel, String storeAddress, String storeDescription,
-			String storeLatitude, String storeLongitude, String memberId, int storeId) {
+	public void updateStore(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId, int storeId, int storeIsOpened) {
 		
 		Store store = new Store();
 		store.setTitle(storeName);
@@ -75,6 +75,7 @@ public class StoreServiceImpl implements StoreService{
 		store.setLongitude(storeLongitude);		
 		store.setMemberId(memberId);
 		store.setId(storeId);
+		store.setOpened(storeIsOpened);
 		
 		storeRepository.save(store);
 	}

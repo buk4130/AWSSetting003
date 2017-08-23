@@ -1,9 +1,12 @@
 package com.woowahan.baeminWaiting004.service;
 
+import java.util.ArrayList;
+
 import com.woowahan.baeminWaiting004.model.Menu;
 
 public interface MenuService {
 
-	void addMenu(Menu menu);
-	Menu findByStoreId(int storeId);
+	void addMenu(ArrayList<Menu> menus, int storeId);
+	ArrayList<Menu> findByStoreId(int storeId);
+	void removeMenuByStoreId(int storeId);
 }
