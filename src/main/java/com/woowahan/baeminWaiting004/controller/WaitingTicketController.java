@@ -17,12 +17,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.baeminWaiting004.model.CheckTicketJsonType;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
 import com.woowahan.baeminWaiting004.repository.WaitingListRepository;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
+import com.woowahan.baeminWaiting004.service.StoreService;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
 import com.woowahan.baeminWaiting004.service.WaitingTicketService;
 
@@ -36,6 +38,9 @@ public class WaitingTicketController {
 	
 	@Autowired
 	private WaitingListRepository waitingListRepository;
+	
+	@Autowired
+	private StoreService StoreService;
 
 	
 	//처음 대기표 받을때 기능(param: fk waitingListId, memberId 꼭 필요 ) 
@@ -61,15 +66,15 @@ public class WaitingTicketController {
 		
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
-		
-		System.out.println(waitingTickets.size());
 		waitingList.setCurrentInLine(waitingTickets.size());
 		waitingListRepository.save(waitingList);
 		
-		WaitingTicketJsonType waitingTicketJsonType = new WaitingTicketJsonType();
-		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
-		waitingTicketJsonType.setIsSuccess(1);
-		waitingTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+//		WaitingTicketJsonType waitingTicketJsonType = new WaitingTicketJsonType();
+//		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
+//		waitingTicketJsonType.setIsSuccess(1);
+//		waitingTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+		
+		CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
 		
 		return objectMapper.writeValueAsString(waitingTicketJsonType);
 	}
