@@ -2,7 +2,7 @@ package com.woowahan.baeminWaiting004.model;
 
 public class SignUpJsonObject {
 
-	private String userId, userPassword, userMemberTel;
+	private String userId, userPassword, userMemberTel, userName;
 	private int userMemberRole;
 	
 	public String getUserId() {
@@ -29,6 +29,12 @@ public class SignUpJsonObject {
 	}
 	public void setUserMemberRole(int userMemberRole) {
 		this.userMemberRole = userMemberRole;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 	
 	

@@ -7,4 +7,5 @@ import com.woowahan.baeminWaiting004.model.Member;
 public interface MemberRepository extends JpaRepository<Member, Integer>{
 
 	Member findByMemberId(String memberId);
+	int countByMemberId(String memberId);
 }
