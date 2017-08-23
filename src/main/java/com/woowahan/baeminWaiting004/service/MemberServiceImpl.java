@@ -28,7 +28,7 @@ public class MemberServiceImpl implements MemberService{
 	
  
 	@Override
-	public void addMember(String memberId, String userPassword, String userMemberTel, int userRole) {
+	public void addMember(String memberId, String userPassword, String userMemberTel, int userRole ,String userName) {
 		Member member = new Member();
 		
 		member.setMemberId(memberId);
@@ -36,6 +36,16 @@ public class MemberServiceImpl implements MemberService{
 		member.setPassword(userPassword);
 		member.setTel(userMemberTel);
 		member.setRole(userRole);
+		member.setName(userName);
+		
 		memberRepository.save(member);
 	}
+
+
+	@Override
+	public int countByMemberId(String memberId) {
+		return memberRepository.countByMemberId(memberId);
+	}
+	
+	
 }

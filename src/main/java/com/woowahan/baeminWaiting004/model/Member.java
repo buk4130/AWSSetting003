@@ -24,6 +24,9 @@ public class Member {
 	@Column(name="member_role")
 	private int role;
 	
+	@Column(name="member_name")
+	private String name;
+	
 
 	public String getMemberId() {
 		return memberId;
@@ -57,4 +60,13 @@ public class Member {
 		this.role = role;
 	}
 
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	
 }

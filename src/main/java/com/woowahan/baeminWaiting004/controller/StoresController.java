@@ -3,6 +3,8 @@ package com.woowahan.baeminWaiting004.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +74,7 @@ public class StoresController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		return objectMapper.writeValueAsString(storeJsonTypeList);
 	}
-	
+	//가게 등록 
 	//jw
 	@RequestMapping(value = "/store", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
@@ -279,8 +281,30 @@ public class StoresController {
 		}
 		
 		storeService.addStore3(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId());
+		String result = String.valueOf(rStore.getOpened());
+		return result;
+	}
+	
+	//로그아웃할때 턴 off 로해주는
+	@RequestMapping(value="/signout", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String logoutTurnOff(@RequestBody String storeJson, HttpServletRequest request) throws Exception {
+		ObjectMapper objectMapper = new ObjectMapper();
+		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
 		
-		return null;
+		String memberId = storeJsonType.getMemberId();
+		Store rStore = storeService.getStoreId(memberId);
+		int isOpen = rStore.getOpened();
+		
+		if(isOpen == 1) { //열렸으면 
+			rStore.setOpened(0);
+		}else if(isOpen == 0) {//닫혔으면 
+			rStore.setOpened(0);
+		}
+		
+		storeService.addStore3(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId());
+		String result = String.valueOf(rStore.getOpened());
+		return result;
 	}
 	
 }

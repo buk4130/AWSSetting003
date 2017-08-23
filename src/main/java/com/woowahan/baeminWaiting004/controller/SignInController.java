@@ -65,12 +65,15 @@ public class SignInController {
 			if( rStore != null) {
 				storeId = rStore.getId();
 			}
+			tokenJsonType.setMemberId(userId);
+			tokenJsonType.setStoreId(storeId);
 		}
 		
-		tokenJsonType.setMemberId(userId);
-		tokenJsonType.setStoreId(storeId);
 		tokenJsonType.setToken(token);
 		
 		return objectMapper.writeValueAsString(tokenJsonType);
 	}
+	
+	
+	
 }
