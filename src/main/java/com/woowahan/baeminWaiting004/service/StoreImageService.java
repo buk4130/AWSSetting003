@@ -8,4 +8,6 @@ public interface StoreImageService {
 	StoreImage findByStoreId(int storeId);
 	
 	List<StoreImage> getAllStoresImage();
+	
+	void addImg(StoreImage storeImage);
 }

@@ -26,6 +26,12 @@ public class StoreImageServiceImpl implements StoreImageService {
 		StoreImage storeImage = storeImageRepository.findByStoreId(storeId);
 		return storeImage;
 	}
+
+	@Override
+	public void addImg(StoreImage storeImage) {
+		storeImageRepository.save(storeImage);
+		
+	}
 	
 	
 }

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.baeminWaiting004.model.InnerMenu;
 import com.woowahan.baeminWaiting004.model.Menu;
 import com.woowahan.baeminWaiting004.model.Store;
 import com.woowahan.baeminWaiting004.model.StoreIdJsonType;
@@ -24,6 +25,7 @@ import com.woowahan.baeminWaiting004.model.StoreImage;
 import com.woowahan.baeminWaiting004.model.StoreInfoJsonObject;
 import com.woowahan.baeminWaiting004.model.StoreJsonObject;
 import com.woowahan.baeminWaiting004.model.StoreJsonType;
+import com.woowahan.baeminWaiting004.model.WebTokenJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.service.MenuService;
 import com.woowahan.baeminWaiting004.service.StoreImageService;
@@ -90,54 +92,37 @@ public class StoresController {
 		String storeLatitude = storeJsonType.getStoreLatitude();
 		String storeLongitude = storeJsonType.getStoreLongitude();
 		String memberId = storeJsonType.getMemberId();
+		String imgUrl = storeJsonType.getStoreImgUrl();
+		ArrayList<InnerMenu> menus = storeJsonType.getMenus();
 		
 		String storeIsOpened = "0";
-		//String storeMenu1, storeMenu2, storeMenu3, storeMenu4, storeMenu5, storeMenu6, storeMenu7, storeMenu8, storeMenu9, storeMenu10 ="";
+
+		//storeTB save
+		storeService.firstAddStore(storeName, storeTel, storeAddress, storeDescription, storeLatitude, storeLongitude, memberId);
 		
-		Menu menu = new Menu();
-		if(storeJsonType.getStoreMenu1() != null) {
-			menu.setMenu1(storeJsonType.getStoreMenu1());
-		}
-		if(storeJsonType.getStoreMenu2() != null) {
-			menu.setMenu2(storeJsonType.getStoreMenu2());
-		}
-		if(storeJsonType.getStoreMenu3() != null) {
-			menu.setMenu3(storeJsonType.getStoreMenu3());
-		}
-		if(storeJsonType.getStoreMenu4() != null) {
-			menu.setMenu4(storeJsonType.getStoreMenu4());
-		}
-		if(storeJsonType.getStoreMenu5() != null) {
-			menu.setMenu5(storeJsonType.getStoreMenu5());
-		}
-		if(storeJsonType.getStoreMenu6() != null) {
-			menu.setMenu6(storeJsonType.getStoreMenu6());
-		}
-		if(storeJsonType.getStoreMenu7() != null) {
-			menu.setMenu7(storeJsonType.getStoreMenu7());
-		}
-		if(storeJsonType.getStoreMenu8() != null) {
-			menu.setMenu8(storeJsonType.getStoreMenu8());
-		}
-		if(storeJsonType.getStoreMenu9() != null) {
-			menu.setMenu9(storeJsonType.getStoreMenu9());
-		}
-		if(storeJsonType.getStoreMenu10() != null) {
-			menu.setMenu10(storeJsonType.getStoreMenu10());
-		}
-		
-		
-		
-		storeService.addStore2(storeName, storeTel, storeAddress, storeDescription, storeLatitude, storeLongitude, memberId);
-		//System.out.println("done123");
-		
-		Store rStore = storeService.getStoreId(memberId);
+		//get storeId
+		Store rStore = storeService.getStoreInfoByMemberId(memberId);
 		StoreIdJsonType storeIdJsonType = new StoreIdJsonType();
 		int rStoreId = rStore.getId();
 		
-		menu.setStoreId(rStoreId);
-		menuService.addMenu(menu);
+		//imgTB save by storeId
+		StoreImage storeImage = new StoreImage();
+		storeImage.setImgUrl(imgUrl);
+		storeImage.setStoreId(rStoreId);
+		storeImageService.addImg(storeImage);
 		
+		//menuTB save by storeId
+		ArrayList<Menu> pMenus = new ArrayList<Menu>();
+		for(InnerMenu i : menus) {
+			Menu tempMenu = new Menu();
+			tempMenu.setName(i.getName());
+			tempMenu.setPrice(i.getPrice());
+			tempMenu.setStoreId(rStoreId);
+			pMenus.add(tempMenu);
+		}
+		menuService.addMenu(pMenus, rStoreId);
+		
+		//return storeId
 		storeIdJsonType.setStoreId(rStoreId);
 		return objectMapper.writeValueAsString(storeIdJsonType);
 	}
@@ -145,14 +130,20 @@ public class StoresController {
 	//get one store info
 	@RequestMapping(value = "/storeInfo", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
-	public String getStoreInfo(@RequestBody String storeJson) throws Exception{
+	public String getStoreInfo(@RequestBody String tokenJson) throws Exception{
 		ObjectMapper objectMapper = new ObjectMapper();
-		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
+		WebTokenJsonObject param = objectMapper.readValue(tokenJson, WebTokenJsonObject.class);
 		
-		String memberId = storeJsonType.getMemberId();
-		Store rStore = storeService.getStoreId(memberId);
-		Menu rMenu = menuService.findByStoreId(rStore.getId());
+		//id 꺼내기 
+		String memberId = param.getToken().getMemberId();
+		//storeInfo 
+		Store rStore = storeService.getStoreInfoByMemberId(memberId);
+		//img info
+		StoreImage rStoreImg = storeImageService.findByStoreId(rStore.getId());
+		//menu info 
+		ArrayList<Menu> rMenu = menuService.findByStoreId(rStore.getId());
 		
+		//making rvo
 		StoreInfoJsonObject storeInfoJsonObject = new StoreInfoJsonObject();
 		storeInfoJsonObject.setTitle(rStore.getTitle());
 		storeInfoJsonObject.setDesc(rStore.getDescription());
@@ -160,37 +151,9 @@ public class StoresController {
 		storeInfoJsonObject.setLatitude(rStore.getLatitude());
 		storeInfoJsonObject.setLongitude(rStore.getLongitude());
 		storeInfoJsonObject.setTel(rStore.getTel());
-		if(rMenu.getMenu1()!=null) {			
-			storeInfoJsonObject.setMenu1(rMenu.getMenu1());
-		}
-		if(rMenu.getMenu2()!=null) {			
-			storeInfoJsonObject.setMenu2(rMenu.getMenu2());
-		}
-		if(rMenu.getMenu3()!=null) {			
-			storeInfoJsonObject.setMenu3(rMenu.getMenu3());
-		}
-		if(rMenu.getMenu4()!=null) {			
-			storeInfoJsonObject.setMenu4(rMenu.getMenu4());
-		}
-		if(rMenu.getMenu5()!=null) {			
-			storeInfoJsonObject.setMenu5(rMenu.getMenu5());
-		}
-		if(rMenu.getMenu6()!=null) {			
-			storeInfoJsonObject.setMenu6(rMenu.getMenu6());
-		}
-		if(rMenu.getMenu7()!=null) {			
-			storeInfoJsonObject.setMenu7(rMenu.getMenu7());
-		}
-		if(rMenu.getMenu8()!=null) {			
-			storeInfoJsonObject.setMenu8(rMenu.getMenu8());
-		}
-		if(rMenu.getMenu9()!=null) {			
-			storeInfoJsonObject.setMenu9(rMenu.getMenu9());
-		}
-		if(rMenu.getMenu10()!=null) {			
-			storeInfoJsonObject.setMenu10(rMenu.getMenu10());
-		}
 		
+		storeInfoJsonObject.setMenus(rMenu);
+		storeInfoJsonObject.setImgUrl(rStoreImg.getImgUrl());
 		
 		return objectMapper.writeValueAsString(storeInfoJsonObject);
 	}
@@ -200,111 +163,118 @@ public class StoresController {
 	@ResponseBody
 	public String updateStore(@RequestBody String storeJson) throws Exception{
 			
-			ObjectMapper objectMapper = new ObjectMapper();
-			StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
-			
-			int storeId = storeJsonType.getStoreId();
-			String storeName = storeJsonType.getStoreName();
-			String storeAddress = storeJsonType.getStoreAddress();
-			String storeTel = storeJsonType.getStoreTel();
-			String storeDescription = storeJsonType.getStoreDesc();
-			String storeLatitude = storeJsonType.getStoreLatitude();
-			String storeLongitude = storeJsonType.getStoreLongitude();
-			String memberId = storeJsonType.getMemberId();
-			
-			String storeIsOpened = "0";
-			//String storeMenu1, storeMenu2, storeMenu3, storeMenu4, storeMenu5, storeMenu6, storeMenu7, storeMenu8, storeMenu9, storeMenu10 ="";
-			
-			Menu menu = new Menu();
-			if(storeJsonType.getStoreMenu1() != null) {
-				menu.setMenu1(storeJsonType.getStoreMenu1());
-			}
-			if(storeJsonType.getStoreMenu2() != null) {
-				menu.setMenu2(storeJsonType.getStoreMenu2());
-			}
-			if(storeJsonType.getStoreMenu3() != null) {
-				menu.setMenu3(storeJsonType.getStoreMenu3());
-			}
-			if(storeJsonType.getStoreMenu4() != null) {
-				menu.setMenu4(storeJsonType.getStoreMenu4());
-			}
-			if(storeJsonType.getStoreMenu5() != null) {
-				menu.setMenu5(storeJsonType.getStoreMenu5());
-			}
-			if(storeJsonType.getStoreMenu6() != null) {
-				menu.setMenu6(storeJsonType.getStoreMenu6());
-			}
-			if(storeJsonType.getStoreMenu7() != null) {
-				menu.setMenu7(storeJsonType.getStoreMenu7());
-			}
-			if(storeJsonType.getStoreMenu8() != null) {
-				menu.setMenu8(storeJsonType.getStoreMenu8());
-			}
-			if(storeJsonType.getStoreMenu9() != null) {
-				menu.setMenu9(storeJsonType.getStoreMenu9());
-			}
-			if(storeJsonType.getStoreMenu10() != null) {
-				menu.setMenu10(storeJsonType.getStoreMenu10());
-			}
-			
-			
-			
-			storeService.addStore3(storeName, storeTel, storeAddress, storeDescription, storeLatitude, storeLongitude, memberId, storeId);
-			//System.out.println("done123");
-			
-			Store rStore = storeService.getStoreId(memberId);
-			StoreIdJsonType storeIdJsonType = new StoreIdJsonType();
-			int rStoreId = rStore.getId();
-			
-			menu.setStoreId(rStoreId);
-			menuService.addMenu(menu);
-			
-			storeIdJsonType.setStoreId(rStoreId);
-			return objectMapper.writeValueAsString(storeIdJsonType);
-	}
-	
-	//onoff store
-	@RequestMapping(value = "/onoff", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
-	@ResponseBody
-	public String turnOnOffStore(@RequestBody String storeJson) throws Exception{
 		ObjectMapper objectMapper = new ObjectMapper();
 		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
 		
+		int storeId = storeJsonType.getStoreId();
+		String storeName = storeJsonType.getStoreName();
+		String storeAddress = storeJsonType.getStoreAddress();
+		String storeTel = storeJsonType.getStoreTel();
+		String storeDescription = storeJsonType.getStoreDesc();
+		String storeLatitude = storeJsonType.getStoreLatitude();
+		String storeLongitude = storeJsonType.getStoreLongitude();
 		String memberId = storeJsonType.getMemberId();
-		Store rStore = storeService.getStoreId(memberId);
-		int isOpen = rStore.getOpened();
+		String imgUrl = storeJsonType.getStoreImgUrl();
+		ArrayList<InnerMenu> menus = storeJsonType.getMenus();
 		
-		if(isOpen == 1) { //열렸으면 
-			rStore.setOpened(0);
-		}else if(isOpen == 0) {//닫혔으면 
+		//storeInfo 
+		Store rStore = storeService.getStoreInfoByMemberId(memberId);
+		//img info
+		StoreImage rStoreImg = storeImageService.findByStoreId(rStore.getId());
+		//menu info 
+		//ArrayList<Menu> rMenu = menuService.findByStoreId(rStore.getId());
+		
+		//rStore update
+		rStore.setTitle(storeName);
+		rStore.setAddress(storeAddress);
+		rStore.setTel(storeTel);
+		rStore.setDescription(storeDescription);
+		rStore.setLatitude(storeLatitude);
+		rStore.setLongitude(storeLongitude);
+		
+		rStoreImg.setImgUrl(imgUrl);
+		
+		//remove all menu and save all again
+		menuService.removeMenuByStoreId(storeId);
+		//menuTB save by storeId
+		ArrayList<Menu> pMenus = new ArrayList<Menu>();
+		for(InnerMenu i : menus) {
+			Menu tempMenu = new Menu();
+			tempMenu.setName(i.getName());
+			tempMenu.setPrice(i.getPrice());
+			tempMenu.setStoreId(storeId);
+			pMenus.add(tempMenu);
+		}
+		menuService.addMenu(pMenus, storeId);
+		
+		StoreIdJsonType storeIdJsonType = new StoreIdJsonType();
+		storeIdJsonType.setStoreId(storeId);
+		return objectMapper.writeValueAsString(storeIdJsonType);
+	}
+	
+	//onoff store
+	@RequestMapping(value = "/status", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String changeStoreStatus(@RequestBody String storeJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		WebTokenJsonObject param = objectMapper.readValue(storeJson, WebTokenJsonObject.class);
+				
+		String memberId = param.getToken().getMemberId();
+		String status = param.getStatus();
+		//store info get
+		Store rStore = storeService.getStoreInfoByMemberId(memberId);
+		
+		if(status.equals("on")) { //가게 오픈 대기 가능  
 			rStore.setOpened(1);
+		}else if(status.equals("off")) {//가게 오프, 대기줄 삭제  
+			rStore.setOpened(0);
+		}else if(status.equals("deny")) {// 가게 오픈 but 대기 신청 불가능, 기존 대기줄 유효
+			rStore.setOpened(2);
 		}
 		
-		storeService.addStore3(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId());
+		storeService.updateStore(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId(), rStore.getOpened());
 		String result = String.valueOf(rStore.getOpened());
 		return result;
 	}
 	
 	//로그아웃할때 턴 off 로해주는
-	@RequestMapping(value="/signout", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+//	@RequestMapping(value="/signout", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+//	@ResponseBody
+//	public String logoutTurnOff(@RequestBody String storeJson, HttpServletRequest request) throws Exception {
+//		ObjectMapper objectMapper = new ObjectMapper();
+//		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
+//		
+//		String memberId = storeJsonType.getMemberId();
+//		Store rStore = storeService.getStoreInfoByMemberId(memberId);
+//		int isOpen = rStore.getOpened();
+//		
+//		if(isOpen == 1) { //열렸으면 
+//			rStore.setOpened(0);
+//		}else if(isOpen == 0) {//닫혔으면 
+//			rStore.setOpened(0);
+//		}
+//		
+//		storeService.addStore3(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId());
+//		String result = String.valueOf(rStore.getOpened());
+//		return result;
+//	}
+	
+	
+	//json object receive test
+	@RequestMapping(value="/test", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
-	public String logoutTurnOff(@RequestBody String storeJson, HttpServletRequest request) throws Exception {
+	public String test(@RequestBody String testJson, HttpServletRequest request) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
-		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
+		WebTokenJsonObject param = objectMapper.readValue(testJson, WebTokenJsonObject.class);
 		
-		String memberId = storeJsonType.getMemberId();
-		Store rStore = storeService.getStoreId(memberId);
-		int isOpen = rStore.getOpened();
+		System.out.println(param);
+		int storeId = param.getToken().getStoreId();
+		ArrayList arr = param.getMenus();
 		
-		if(isOpen == 1) { //열렸으면 
-			rStore.setOpened(0);
-		}else if(isOpen == 0) {//닫혔으면 
-			rStore.setOpened(0);
-		}
+		System.out.println(storeId + "   !!!   " + param.getMenus().get(1).getName());
 		
-		storeService.addStore3(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId());
-		String result = String.valueOf(rStore.getOpened());
-		return result;
+		
+		return null;
 	}
 	
 }

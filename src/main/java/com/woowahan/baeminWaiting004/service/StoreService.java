@@ -13,12 +13,12 @@ public interface StoreService {
 			String topLeftLat, String topLeftLong, String bottomLeftLat, String bottomLeftLong);
 	
 	//jw
-	Store getStoreId(String memberId);
+	Store getStoreInfoByMemberId(String memberId);
 	
 	//jw
-	void addStore2(String storeName, String storeTel, String storeAddress, String storeDescription,
+	void firstAddStore(String storeName, String storeTel, String storeAddress, String storeDescription,
 			String storeLatitude, String storeLongitude, String memberId);
 	
-	void addStore3(String storeName, String storeTel, String storeAddress, String storeDescription,
-			String storeLatitude, String storeLongitude, String memberId, int storeId); 
+	void updateStore(String storeName, String storeTel, String storeAddress, String storeDescription,
+			String storeLatitude, String storeLongitude, String memberId, int storeId, int storeIsOpened); 
 }
