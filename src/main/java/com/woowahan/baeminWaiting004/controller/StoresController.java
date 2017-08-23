@@ -224,10 +224,13 @@ public class StoresController {
 		//store info get
 		Store rStore = storeService.getStoreInfoByMemberId(memberId);
 		
+		WaitingTicketController wtController = new WaitingTicketController();
+		
 		if(status.equals("on")) { //가게 오픈 대기 가능  
 			rStore.setOpened(1);
 		}else if(status.equals("off")) {//가게 오프, 대기줄 삭제  
 			rStore.setOpened(0);
+			wtController.deleteAllWaitingTicket(rStore.getId());//deleteAllTickets
 		}else if(status.equals("deny")) {// 가게 오픈 but 대기 신청 불가능, 기존 대기줄 유효
 			rStore.setOpened(2);
 		}
