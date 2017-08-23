@@ -14,4 +14,6 @@ public interface WaitingTicketService {
 	List<WaitingTicket> getAllWaitingTicket();
 	List<WaitingTicket> findByWaitingListIdAndDeleted(int waitingListId, int deleted);
 	
+	void updateTicketByTicketNum(WaitingTicket waitingTicket);
+	
 }

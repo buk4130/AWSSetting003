@@ -114,6 +114,36 @@ public class WaitingTicketController {
 		
 	}
 	
+	//update ticket
+	@RequestMapping(value="/deleteTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String updateTicketByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+
+		int ticketNum = waitingTicketJsonObject.getTicketNumber();
+		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);
+		rWaitingTicket.setDeleted(1);
+		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
+		
+		return "true";
+	}
+	
+	//티켓넘버로 디테일 가져오기 
+	@RequestMapping(value="/waitingPerson", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getCustomerDetailByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+
+		int ticketNum = waitingTicketJsonObject.getTicketNumber();
+		
+		//
+		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);		
+		
+		return objectMapper.writeValueAsString(rWaitingTicket);
+	}	
+	
 //	@RequestMapping(value="/findByTicketNumber", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 //	@ResponseBody
 //	public String findByTicketNumber(@RequestBody String waitingTicketJson) throws Exception{

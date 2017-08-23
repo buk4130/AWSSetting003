@@ -6,5 +6,7 @@ public interface MemberService {
 
 	Member findByUsername(String name);
 	
-	void addMember(String memberId, String userPassword, String userMemberTel, int userRole);
+	void addMember(String memberId, String userPassword, String userMemberTel, int userRole , String userName);
+	
+	int countByMemberId(String memberId);
 }
