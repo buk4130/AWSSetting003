@@ -20,7 +20,7 @@ public class WaitingList {
 	private int storeId;
 	
 	//줄 개수 
-	@Column(name="current_in_line")
+	@Column(name="current_in_line", insertable=true, updatable=true)
 	private int currentInLine;
 
 	public int getWaitingListId() {

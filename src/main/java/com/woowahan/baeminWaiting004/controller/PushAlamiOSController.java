@@ -23,7 +23,6 @@ public class PushAlamiOSController {
 	@ResponseBody
 	public void pushAlarm(@RequestBody String postJson) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		System.out.println("1111");
 		PushAlarmJsonObject pushAlarmJsonObject = objectMapper.readValue(postJson, PushAlarmJsonObject.class);
 		System.out.println(pushAlarmJsonObject.getPushAlarm());
 		
@@ -34,7 +33,7 @@ public class PushAlamiOSController {
 		
 		System.out.println("{ \"aps\": { \"alert\": \"Breaking News!\", \"sound\": \"default\", \"link_url\": \"https://raywenderlich.com\"}");
 		//String payload =APNS.newPayload().alertBody("breaking News!").build();
-		String payload = APNS.newPayload().alertBody("breaking News!").sound("default").build();
+		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPushAlarm()).sound("default").build();
 		String token = "60647f0d700606e6a97c2648c9fc9f26c37268081fceea4f3d867968dad660b1";
 		
 		apnsService.push(token, payload);
