@@ -7,6 +7,8 @@ import com.woowahan.baeminWaiting004.model.Store;
 public interface StoreService {
 
 	List<Store> getAllStores();
+	
+	Store findByid(int storeId);
 
 	void addStore(String storeName, String storeTel, String storeAddress, 
 			String storeDescription, String storeLatitude, String storeLongitude, int storeIsOpened, String memberId,

@@ -7,4 +7,5 @@ import com.woowahan.baeminWaiting004.model.Store;
 public interface StoreRepository extends JpaRepository<Store, Integer>{
 	
 	Store findByMemberId(String memberId);
+	Store findById(int storeId);
 }

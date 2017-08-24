@@ -8,4 +8,5 @@ public interface WaitingListService {
 	void addWaitingList(int storeId);
 	WaitingList findByWaitingListId(int storeId);
 	List<WaitingList> getAllWaitingList();
+	void updateWaitingList(WaitingList waitingList);
 }

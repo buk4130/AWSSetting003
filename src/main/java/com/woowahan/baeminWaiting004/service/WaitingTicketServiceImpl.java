@@ -61,8 +61,6 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 
 	@Override
 	public void updateTicketByTicketNum(WaitingTicket waitingTicket) {
-		//waitingTicketRepository.delete(ticketNumber);
-		//update
 		waitingTicketRepository.save(waitingTicket);
 	}	
 

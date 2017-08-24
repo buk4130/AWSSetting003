@@ -33,4 +33,9 @@ public class WaitingListServiceImpl implements WaitingListService{
 		return waitingLists;
 	}
 
+	@Override
+	public void updateWaitingList(WaitingList waitingList) {
+		waitingListRepository.save(waitingList);
+	}
+
 }

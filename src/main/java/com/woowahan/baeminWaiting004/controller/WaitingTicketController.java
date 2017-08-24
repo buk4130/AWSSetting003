@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woowahan.baeminWaiting004.model.CheckTicketJsonType;
+import com.woowahan.baeminWaiting004.model.Store;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
@@ -37,10 +38,7 @@ public class WaitingTicketController {
 	private WaitingListService waitingListService;
 	
 	@Autowired
-	private WaitingListRepository waitingListRepository;
-	
-	@Autowired
-	private StoreService StoreService;
+	private StoreService storeService;
 
 	
 	//처음 대기표 받을때 기능(param: fk waitingListId, memberId 꼭 필요 ) 
@@ -67,16 +65,19 @@ public class WaitingTicketController {
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
 		waitingList.setCurrentInLine(waitingTickets.size());
-		waitingListRepository.save(waitingList);
+		waitingListService.updateWaitingList(waitingList);
 		
-//		WaitingTicketJsonType waitingTicketJsonType = new WaitingTicketJsonType();
-//		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
-//		waitingTicketJsonType.setIsSuccess(1);
-//		waitingTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
 		
+		Store store = storeService.findByid(waitingList.getStoreId());
+		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
 		CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
+		checkTicketJsonType.setIsSuccess(1);
+		checkTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+		checkTicketJsonType.setCurrentInLine(waitingList.getCurrentInLine());
+		checkTicketJsonType.setStoreName(store.getTitle());
 		
-		return objectMapper.writeValueAsString(waitingList);
+
+		return objectMapper.writeValueAsString(checkTicketJsonType);
 	}
 	
 	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 

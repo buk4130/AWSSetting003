@@ -2,6 +2,7 @@ package com.woowahan.baeminWaiting004.controller;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,28 +14,46 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.notnoop.apns.APNS;
 import com.notnoop.apns.ApnsService;
+import com.woowahan.baeminWaiting004.model.AddTokenJsonObject;
 import com.woowahan.baeminWaiting004.model.PushAlarmJsonObject;
+import com.woowahan.baeminWaiting004.service.TokenService;
 
 
 @Controller
 public class PushAlamiOSController {
 
+	@Autowired
+	private TokenService tokenService;
+	
+	@RequestMapping(value="/addToken", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String addToken(@RequestBody String addToken) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		AddTokenJsonObject addTokenJsonObject= objectMapper.readValue(addToken, AddTokenJsonObject.class);
+		
+		int ticketNumber = addTokenJsonObject.getTicketNumber();
+		String tokenNum = addTokenJsonObject.getToken();
+		tokenService.addToken(ticketNumber, tokenNum);
+		System.out.println(tokenNum);
+		
+		int isSuccess = 1;
+		
+		return objectMapper.writeValueAsString(isSuccess);
+	}
+	
 	@RequestMapping(value="/push", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
 	public void pushAlarm(@RequestBody String postJson) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		PushAlarmJsonObject pushAlarmJsonObject = objectMapper.readValue(postJson, PushAlarmJsonObject.class);
-		System.out.println(pushAlarmJsonObject.getPushAlarm());
 		
 		ApnsService apnsService = APNS.newService()
-		.withCert("/Users/woowabrothers/Workspace/Techfile/wender.p12", "12345678")
+		.withCert("/Users/woowabrothers/Workspace/Techfile/baeminWaiting.p12", "waiting1234")
 		.withSandboxDestination()
 		.build();
 		
-		System.out.println("{ \"aps\": { \"alert\": \"Breaking News!\", \"sound\": \"default\", \"link_url\": \"https://raywenderlich.com\"}");
-		//String payload =APNS.newPayload().alertBody("breaking News!").build();
-		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPushAlarm()).sound("default").build();
-		String token = "60647f0d700606e6a97c2648c9fc9f26c37268081fceea4f3d867968dad660b1";
+		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPayload()).sound("default").build();
+		String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
 		
 		apnsService.push(token, payload);
 	}

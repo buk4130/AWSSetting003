@@ -79,4 +79,10 @@ public class StoreServiceImpl implements StoreService{
 		
 		storeRepository.save(store);
 	}
+
+
+	@Override
+	public Store findByid(int storeId) {
+		return storeRepository.findById(storeId);
+	}
 }

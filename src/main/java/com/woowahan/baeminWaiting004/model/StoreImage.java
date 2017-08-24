@@ -9,9 +9,9 @@ import javax.persistence.Table;
 @Table(name="STOREIMAGE")
 public class StoreImage {
 	
-	
 	@Column(name="img_url")
 	private String imgUrl;
+			
 	@Id
 	@Column(name="store_id")
 	private int storeId;

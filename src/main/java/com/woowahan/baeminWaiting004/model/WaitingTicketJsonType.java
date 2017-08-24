@@ -18,7 +18,6 @@ public class WaitingTicketJsonType {
 	public void setTicketNumber(int ticketNumber) {
 		this.ticketNumber = ticketNumber;
 	}
-
 	public String getMemberId() {
 		return memberId;
 	}
