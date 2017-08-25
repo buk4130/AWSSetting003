@@ -17,8 +17,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.woowahan.baeminWaiting004.model.CommonParamObject;
 import com.woowahan.baeminWaiting004.model.InnerMenu;
+import com.woowahan.baeminWaiting004.model.Member;
 import com.woowahan.baeminWaiting004.model.Menu;
+import com.woowahan.baeminWaiting004.model.ResultJsonObject;
 import com.woowahan.baeminWaiting004.model.Store;
 import com.woowahan.baeminWaiting004.model.StoreIdJsonType;
 import com.woowahan.baeminWaiting004.model.StoreImage;
@@ -27,10 +30,13 @@ import com.woowahan.baeminWaiting004.model.StoreJsonObject;
 import com.woowahan.baeminWaiting004.model.StoreJsonType;
 import com.woowahan.baeminWaiting004.model.WebTokenJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingList;
+import com.woowahan.baeminWaiting004.model.WaitingTicket;
+import com.woowahan.baeminWaiting004.service.MemberService;
 import com.woowahan.baeminWaiting004.service.MenuService;
 import com.woowahan.baeminWaiting004.service.StoreImageService;
 import com.woowahan.baeminWaiting004.service.StoreService;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
+import com.woowahan.baeminWaiting004.service.WaitingTicketService;
 
 @Controller
 public class StoresController {
@@ -46,6 +52,11 @@ public class StoresController {
 	
 	@Autowired
 	private MenuService menuService;
+	
+	@Autowired
+	private WaitingTicketService waitingTicketService;
+	@Autowired
+	private MemberService memberService;
 	
 	@RequestMapping(value = "/stores", method = RequestMethod.GET, produces="text/plain;charset=UTF-8")
 	@ResponseBody
@@ -76,6 +87,52 @@ public class StoresController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		return objectMapper.writeValueAsString(storeJsonTypeList);
 	}
+	
+	//web 둘러보기용 
+	@RequestMapping(value = "/otherStores", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getAllOtherStores(@RequestBody String json) throws Exception{
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		CommonParamObject param = objectMapper.readValue(json, CommonParamObject.class);
+		
+		List<Store> stores = storeService.findByStoreIdBetween(param.getFirstNum(), param.getLastNum());
+		List<StoreJsonObject> storeJsonTypeList = new ArrayList<StoreJsonObject>();
+		
+		for (int i = 0; i < stores.size(); i++) {
+			StoreJsonObject storeJsonObject = new StoreJsonObject();
+			Store store = stores.get(i);
+			storeJsonObject.setStoreAddress(store.getAddress());
+			storeJsonObject.setStoreId(store.getId());
+
+			storeJsonObject.setStoreName(store.getTitle());
+			
+			StoreImage storeImage = storeImageService.findByStoreId(store.getId());
+			storeJsonObject.setStoreImgUrl(storeImage.getImgUrl());
+			
+//			WaitingList waitingList = waitingListService.findByWaitingListId(store.getId());
+//			storeJsonObject.setCurrentInLine(waitingList.getCurrentInLine());
+			
+			storeJsonTypeList.add(storeJsonObject);
+		}
+		
+
+		return objectMapper.writeValueAsString(storeJsonTypeList);
+	}
+	
+	// 
+	@RequestMapping(value = "/countStores", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String countStores() throws Exception{
+		long count = storeService.countStores();
+		ResultJsonObject result = new ResultJsonObject();
+		result.setCount(count);
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		return objectMapper.writeValueAsString(result);
+	}
+	
+	
 	//가게 등록 
 	//jw
 	@RequestMapping(value = "/store", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
@@ -122,12 +179,15 @@ public class StoresController {
 		}
 		menuService.addMenu(pMenus, rStoreId);
 		
+		//waitingList create
+		waitingListService.addWaitingList(rStoreId);
+		
 		//return storeId
 		storeIdJsonType.setStoreId(rStoreId);
 		return objectMapper.writeValueAsString(storeIdJsonType);
 	}
 	
-	//get one store info
+	//get my store info
 	@RequestMapping(value = "/storeInfo", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
 	public String getStoreInfo(@RequestBody String tokenJson) throws Exception{
@@ -142,6 +202,8 @@ public class StoresController {
 		StoreImage rStoreImg = storeImageService.findByStoreId(rStore.getId());
 		//menu info 
 		ArrayList<Menu> rMenu = menuService.findByStoreId(rStore.getId());
+		//member info
+		Member rMember = memberService.findByMemberId(memberId);
 		
 		//making rvo
 		StoreInfoJsonObject storeInfoJsonObject = new StoreInfoJsonObject();
@@ -155,8 +217,45 @@ public class StoresController {
 		storeInfoJsonObject.setMenus(rMenu);
 		storeInfoJsonObject.setImgUrl(rStoreImg.getImgUrl());
 		
+		storeInfoJsonObject.setMemberId(memberId);
+		storeInfoJsonObject.setMemberName(rMember.getName());
+		storeInfoJsonObject.setMemberTel(rMember.getTel());
+		
 		return objectMapper.writeValueAsString(storeInfoJsonObject);
 	}
+	
+	@RequestMapping(value = "/otherStoreDetail", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getOtherStoreDetail(@RequestBody String tokenJson) throws Exception{
+		ObjectMapper objectMapper = new ObjectMapper();
+		CommonParamObject param = objectMapper.readValue(tokenJson, CommonParamObject.class);
+		
+		//id 꺼내기 
+		int storeId = param.getStoreId();
+		//store info
+		Store rStore = storeService.findByid(storeId);
+		//img info
+		StoreImage rStoreImg = storeImageService.findByStoreId(storeId);
+		//menu info 
+		ArrayList<Menu> rMenu = menuService.findByStoreId(storeId);
+
+		
+		//making rvo
+		StoreInfoJsonObject storeInfoJsonObject = new StoreInfoJsonObject();
+		storeInfoJsonObject.setTitle(rStore.getTitle());
+		storeInfoJsonObject.setDesc(rStore.getDescription());
+		storeInfoJsonObject.setAddr(rStore.getAddress());
+		storeInfoJsonObject.setLatitude(rStore.getLatitude());
+		storeInfoJsonObject.setLongitude(rStore.getLongitude());
+		storeInfoJsonObject.setTel(rStore.getTel());
+		
+		storeInfoJsonObject.setMenus(rMenu);
+		storeInfoJsonObject.setImgUrl(rStoreImg.getImgUrl());
+	
+		
+		return objectMapper.writeValueAsString(storeInfoJsonObject);
+	}
+	
 	
 	//jw
 	@RequestMapping(value = "/updateStore", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
@@ -223,21 +322,32 @@ public class StoresController {
 		String status = param.getStatus();
 		//store info get
 		Store rStore = storeService.getStoreInfoByMemberId(memberId);
-		
-		WaitingTicketController wtController = new WaitingTicketController();
-		
-		if(status.equals("on")) { //가게 오픈 대기 가능  
-			rStore.setOpened(1);
-		}else if(status.equals("off")) {//가게 오프, 대기줄 삭제  
-			rStore.setOpened(0);
-			wtController.deleteAllWaitingTicket(rStore.getId());//deleteAllTickets
-		}else if(status.equals("deny")) {// 가게 오픈 but 대기 신청 불가능, 기존 대기줄 유효
-			rStore.setOpened(2);
-		}
-		
+		WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
+
+		if(rStore != null) {
+			if(status.equals("on")) { //가게 오픈 대기 가능  
+				rStore.setOpened(1);
+			}else if(status.equals("off")) {//가게 오프, 대기줄 삭제  
+				rStore.setOpened(0);
+				List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(rStore.getId());
+				if(!waitingTicketList.isEmpty()) {
+					for(WaitingTicket w : waitingTicketList) {
+						//수정필요 
+						w.setStatus(12);
+						waitingTicketService.updateTicketByTicketNum(w);
+						waitingList.setCurrentInLine(0);
+						waitingListService.updateWaitingList(waitingList);
+					}
+				}
+			}else if(status.equals("deny")) {// 가게 오픈 but 대기 신청 불가능, 기존 대기줄 유효
+				rStore.setOpened(2);
+			}
 		storeService.updateStore(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, rStore.getId(), rStore.getOpened());
-		String result = String.valueOf(rStore.getOpened());
-		return result;
+		}
+
+		ResultJsonObject result =  new ResultJsonObject();
+		result.setResultStatus(status);
+		return objectMapper.writeValueAsString(result);
 	}
 	
 	//로그아웃할때 턴 off 로해주는

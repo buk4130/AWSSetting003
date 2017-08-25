@@ -11,6 +11,7 @@ public class WaitingTicketJsonType {
 	private String createTime;
 	private int ticketNumber;
 	private int isSuccess;	
+	private int status;
 
 	public int getTicketNumber() {
 		return ticketNumber;
@@ -66,5 +67,13 @@ public class WaitingTicketJsonType {
 	public void setIsSuccess(int isSuccess) {
 		this.isSuccess = isSuccess;
 	}
+	public int getStatus() {
+		return status;
+	}
+	public void setStatus(int status) {
+		this.status = status;
+	}
+	
 
+	
 }

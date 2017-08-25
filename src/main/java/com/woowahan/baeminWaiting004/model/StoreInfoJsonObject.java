@@ -15,6 +15,11 @@ public class StoreInfoJsonObject {
 	private String imgUrl;
 	private ArrayList<Menu> menus;
 
+	private String memberId;
+	private String memberTel;
+	private String memberName;
+	
+	
 	public int getStoreId() {
 		return storeId;
 	}
@@ -93,6 +98,30 @@ public class StoreInfoJsonObject {
 
 	public void setMenus(ArrayList<Menu> menus) {
 		this.menus = menus;
+	}
+
+	public String getMemberId() {
+		return memberId;
+	}
+
+	public void setMemberId(String memberId) {
+		this.memberId = memberId;
+	}
+
+	public String getMemberTel() {
+		return memberTel;
+	}
+
+	public void setMemberTel(String memberTel) {
+		this.memberTel = memberTel;
+	}
+
+	public String getMemberName() {
+		return memberName;
+	}
+
+	public void setMemberName(String memberName) {
+		this.memberName = memberName;
 	}
 	
 	

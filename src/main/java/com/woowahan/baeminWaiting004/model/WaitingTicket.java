@@ -32,8 +32,6 @@ public class WaitingTicket {
 	@Column(name="status")
 	private int status;
 
-
-
 	
 	public int getTicketNumber() {
 		return ticketNumber;
@@ -89,5 +87,12 @@ public class WaitingTicket {
 	public void setStatus(int status) {
 		this.status = status;
 	}
+	@Override
+	public String toString() {
+		return "WaitingTicket [ticketNumber=" + ticketNumber + ", waitingListId=" + waitingListId + ", name=" + name
+				+ ", memberId=" + memberId + ", headCount=" + headCount + ", isStaying=" + isStaying
+				+ ", contactNumber=" + contactNumber + ", createTime=" + createTime + ", status=" + status + "]";
+	}
+	
 	
 }

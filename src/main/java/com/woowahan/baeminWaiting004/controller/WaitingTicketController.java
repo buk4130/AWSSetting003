@@ -54,6 +54,7 @@ public class WaitingTicketController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
 		
+		System.out.println(waitingTicketJsonObject);
 		String name = waitingTicketJsonObject.getName();
 		int storeId = waitingTicketJsonObject.getStoreId();
 		int headCount = waitingTicketJsonObject.getHeadCount();
@@ -68,8 +69,13 @@ public class WaitingTicketController {
 		waitingTicketService.addWaitingTicket(name, storeId, memberId, headCount, isStaying, phoneNumber, creatingTime);
 		
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
+		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+		for(int i=0; i<waitingTickets.size(); i++) {
+			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+		}
+		
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
-		waitingList.setCurrentInLine(waitingTickets.size());
+		waitingList.setCurrentInLine(filteredTickets.size());
 		waitingListService.updateWaitingList(waitingList);
 		
 		Store store = storeService.findByid(waitingList.getStoreId());
@@ -84,55 +90,44 @@ public class WaitingTicketController {
 		return objectMapper.writeValueAsString(checkTicketJsonType);
 	}
 	
-//	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
-//	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String getWaitingTicketByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
-//		
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
-//		
-//		//storeId == waitingListId
-//		int waitingListId = waitingTicketJsonObject.getStoreId();
-//		int deleted = 0;//유효한 티켓만 받아오
-//		
-//		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListIdAndDeleted(waitingListId, deleted);
-//		
-//		//결과값 제이슨으로 바꾸
-//		List<WaitingTicketJsonType> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonType>();
-//		for (WaitingTicket waitingTicket : waitingTicketList) {
-//			WaitingTicketJsonType waitingTicketJsonObjectTemp = new WaitingTicketJsonType();
-//			
-//			waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
-//			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-//			waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
-//			waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
-//			waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
-//			waitingTicketJsonObjectTemp.setName(waitingTicket.getName());
-//			waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
-//			waitingTicketJsonObjectTemp.setCreateTime(waitingTicket.getCreateTime());
-//			
-//			waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
-//		}
-//
-//		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
-//		
-//	}
-	
-//	//update ticket
-//	@RequestMapping(value="/deleteTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String updateTicketByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
-//
-//		int ticketNum = waitingTicketJsonObject.getTicketNumber();
-//		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);
-//		rWaitingTicket.setDeleted(1);
-//		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
-//		
-//		return "true";
-//	}
+	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
+	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String getWaitingTicketByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
+		
+		ObjectMapper objectMapper = new ObjectMapper();
+		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+		
+		//storeId == waitingListId
+		int waitingListId = waitingTicketJsonObject.getStoreId();
+		
+		
+		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(waitingListId);
+		
+		//결과값 제이슨으로 바꾸
+		List<WaitingTicketJsonType> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonType>();
+		for (WaitingTicket waitingTicket : waitingTicketList) {
+			//유효한 티켓만 받아오
+			if(waitingTicket.getStatus() < 10) {
+				WaitingTicketJsonType waitingTicketJsonObjectTemp = new WaitingTicketJsonType();
+				
+				waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
+				waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
+				waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
+				waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
+				waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
+				waitingTicketJsonObjectTemp.setName(waitingTicket.getName());
+				waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
+				waitingTicketJsonObjectTemp.setCreateTime(waitingTicket.getCreateTime());
+				waitingTicketJsonObjectTemp.setStatus(waitingTicket.getStatus());
+				
+				waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
+			}
+		}
+
+		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
+		
+	}
 	
 	//update ticket
 	@RequestMapping(value="/deleteTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
@@ -152,8 +147,19 @@ public class WaitingTicketController {
 		}else if(status.equals("cancel")) {// 가게 없주의 취소 
 			rWaitingTicket.setStatus(12);
 		}
-			
 		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
+		
+		WaitingList waitingList = waitingListService.findByWaitingListId(rWaitingTicket.getWaitingListId());
+		
+		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(rWaitingTicket.getWaitingListId());
+		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+		for(int i=0; i<waitingTickets.size(); i++) {
+			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+		}
+		waitingList.setCurrentInLine(filteredTickets.size());
+		waitingListService.updateWaitingList(waitingList);
+		
+		
 		int isSuccess = 1;
 			
 		return objectMapper.writeValueAsString(isSuccess);
@@ -172,15 +178,7 @@ public class WaitingTicketController {
 		return objectMapper.writeValueAsString(rWaitingTicket);
 	}
 	
-	public void deleteAllWaitingTicket(int storeId) throws Exception{
-		List<WaitingTicket> arr = waitingTicketService.findByWaitingListId(storeId);
 		
-		for(WaitingTicket w : arr) {
-			w.setStatus(1);
-			waitingTicketService.updateTicketByTicketNum(w);
-		}
-		
-	}
 	
 	@RequestMapping(value="/validCheckTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
@@ -212,12 +210,6 @@ public class WaitingTicketController {
 		for(int i=0; i<waitingTickets.size(); i++) {
 			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
 		}
-		
-//		Collections.sort(filteredTickets, new Comparator<WaitingTicket>() {
-//			public int compare(WaitingTicket ticket1, WaitingTicket ticket2) {
-//				return (ticket1.getTicketNumber() < ticket2.getTicketNumber()) ? -1: (ticket1.getTicketNumber() > ticket2.getTicketNumber()) ? 1:0;
-//			}
-//		});
 		
 		Store store = storeService.findByid(waitingList.getStoreId());
 		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketNumber);

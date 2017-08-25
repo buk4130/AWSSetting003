@@ -12,5 +12,6 @@ public interface WaitingTicketRepository extends JpaRepository<WaitingTicket, In
 	WaitingTicket findByTicketNumber(int ticketNumber);
 	List<WaitingTicket> findByMemberId(String memberId);
 	List<WaitingTicket> findByWaitingListId(int waitingListId);
+	List<WaitingTicket> findByWaitingListIdAndStatus(int waitingListId, int status);
 	WaitingTicket findByCreateTime(String creatTime);
 }
