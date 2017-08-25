@@ -53,4 +53,12 @@ public class WaitingTicketJsonObject {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
+	@Override
+	public String toString() {
+		return "WaitingTicketJsonObject [name=" + name + ", storeId=" + storeId + ", headCount=" + headCount
+				+ ", isStaying=" + isStaying + ", phoneNumber=" + phoneNumber + ", ticketNumber=" + ticketNumber
+				+ ", status=" + status + "]";
+	}
+	
 }

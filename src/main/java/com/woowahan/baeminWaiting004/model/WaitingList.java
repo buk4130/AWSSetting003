@@ -11,8 +11,8 @@ import javax.persistence.Table;
 @Table(name="WAITINGLIST")
 public class WaitingList {
 	
+	//@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	@Column(name="waiting_list_id")
 	private int waitingListId;
 	

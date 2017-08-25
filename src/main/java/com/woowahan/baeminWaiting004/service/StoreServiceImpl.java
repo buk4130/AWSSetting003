@@ -85,4 +85,19 @@ public class StoreServiceImpl implements StoreService{
 	public Store findByid(int storeId) {
 		return storeRepository.findById(storeId);
 	}
+
+
+	@Override
+	public List<Store> findByStoreIdBetween(int firstNum, int lastNum) {
+		return storeRepository.findByIdBetween(firstNum, lastNum);
+	}
+
+
+	@Override
+	public Long countStores() {
+		return storeRepository.count();
+	}
+	
+	
+	
 }
