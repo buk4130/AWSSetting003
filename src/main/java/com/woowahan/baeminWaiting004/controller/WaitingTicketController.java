@@ -203,13 +203,14 @@ public class WaitingTicketController {
 		
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
 		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
-		waitingList.setCurrentInLine(waitingTickets.size());
-		waitingListService.updateWaitingList(waitingList);
 		
 		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
 		for(int i=0; i<waitingTickets.size(); i++) {
 			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
 		}
+		
+		waitingList.setCurrentInLine(filteredTickets.size());
+		waitingListService.updateWaitingList(waitingList);
 		
 		Store store = storeService.findByid(waitingList.getStoreId());
 		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketNumber);
@@ -221,7 +222,6 @@ public class WaitingTicketController {
 			if (filteredTickets.get(i).getTicketNumber() == waitingTicket.getTicketNumber()) {break;} 
 			index++;
 		}
-		System.out.println(index);
 		checkTicketJsonType.setCurrentInLine(index);
 		checkTicketJsonType.setStoreName(store.getTitle());
 		
