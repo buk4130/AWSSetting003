@@ -48,7 +48,7 @@ public class PushAlamiOSController {
 		PushAlarmJsonObject pushAlarmJsonObject = objectMapper.readValue(postJson, PushAlarmJsonObject.class);
 		
 		ApnsService apnsService = APNS.newService()
-		.withCert("/Users/woowabrothers/Workspace/Techfile/baeminWaiting.p12", "waiting1234")
+		.withCert("/home/ubuntu/aps/baeminWaiting.p12", "waiting1234")
 		.withSandboxDestination()
 		.build();
 		

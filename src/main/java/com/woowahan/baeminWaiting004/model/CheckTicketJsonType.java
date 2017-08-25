@@ -1,7 +1,6 @@
 package com.woowahan.baeminWaiting004.model;
 
 public class CheckTicketJsonType {
-	
 	private String storeName;
 	private int currentInLine;
 	private int ticketNumber;
