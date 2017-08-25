@@ -18,6 +18,8 @@ public class WaitingListServiceImpl implements WaitingListService{
 	public void addWaitingList(int storeId) {
 		WaitingList waitingList = new WaitingList();
 		waitingList.setStoreId(storeId);
+		waitingList.setCurrentInLine(0);
+		waitingList.setWaitingListId(storeId);
 		waitingListRepository.save(waitingList);
 	}
 

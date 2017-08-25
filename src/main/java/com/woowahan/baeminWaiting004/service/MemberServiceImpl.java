@@ -46,6 +46,13 @@ public class MemberServiceImpl implements MemberService{
 	public int countByMemberId(String memberId) {
 		return memberRepository.countByMemberId(memberId);
 	}
+
+
+	@Override
+	public Member findByMemberId(String memberId) {
+		return memberRepository.findByMemberId(memberId);
+	}
+	
 	
 	
 }

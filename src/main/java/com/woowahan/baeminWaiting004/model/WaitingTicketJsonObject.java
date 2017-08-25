@@ -8,7 +8,7 @@ public class WaitingTicketJsonObject {
 	private int isStaying;
 	private String phoneNumber;
 	private int ticketNumber;
-	
+	private String status;
 	
 	public int getTicketNumber() {
 		return ticketNumber;
@@ -46,4 +46,17 @@ public class WaitingTicketJsonObject {
 	public void setIsStaying(int isStaying) {
 		this.isStaying = isStaying;
 	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	@Override
+	public String toString() {
+		return "WaitingTicketJsonObject [name=" + name + ", storeId=" + storeId + ", headCount=" + headCount
+				+ ", isStaying=" + isStaying + ", phoneNumber=" + phoneNumber + ", ticketNumber=" + ticketNumber
+				+ ", status=" + status + "]";
+	}
+	
 }

@@ -23,4 +23,8 @@ public interface StoreService {
 	
 	void updateStore(String storeName, String storeTel, String storeAddress, String storeDescription,
 			String storeLatitude, String storeLongitude, String memberId, int storeId, int storeIsOpened); 
+	
+	List<Store> findByStoreIdBetween(int firstNum, int lastNum);
+	
+	Long countStores();
 }

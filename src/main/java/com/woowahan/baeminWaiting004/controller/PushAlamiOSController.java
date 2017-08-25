@@ -57,4 +57,26 @@ public class PushAlamiOSController {
 		
 		apnsService.push(token, payload);
 	}
+	
+	//jw
+	@RequestMapping(value="/webpush", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String pushAlarmForWeb(@RequestBody String postJson) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		PushAlarmJsonObject pushAlarmJsonObject = objectMapper.readValue(postJson, PushAlarmJsonObject.class);
+		System.out.println(pushAlarmJsonObject);
+		
+		ApnsService apnsService = APNS.newService()
+		.withCert("/Users/woowabrothers/Workspace/Techfile/baeminWaiting.p12", "waiting1234")
+		.withSandboxDestination()
+		.build();
+		
+		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPayload()).sound("default").build();
+		String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
+		//티켓 상태 수정 기능 넣어야함 
+		
+		apnsService.push(token, payload);
+		
+		return "true";
+	}
 }

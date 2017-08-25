@@ -49,6 +49,7 @@ public class WaitingTicketController {
 		ObjectMapper objectMapper = new ObjectMapper();
 		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
 		
+		System.out.println(waitingTicketJsonObject);
 		String name = waitingTicketJsonObject.getName();
 		int storeId = waitingTicketJsonObject.getStoreId();
 		int headCount = waitingTicketJsonObject.getHeadCount();
@@ -90,25 +91,29 @@ public class WaitingTicketController {
 		
 		//storeId == waitingListId
 		int waitingListId = waitingTicketJsonObject.getStoreId();
-		int deleted = 0;//유효한 티켓만 받아오
 		
-		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListIdAndDeleted(waitingListId, deleted);
+		
+		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(waitingListId);
 		
 		//결과값 제이슨으로 바꾸
 		List<WaitingTicketJsonType> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonType>();
 		for (WaitingTicket waitingTicket : waitingTicketList) {
-			WaitingTicketJsonType waitingTicketJsonObjectTemp = new WaitingTicketJsonType();
-			
-			waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
-			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-			waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
-			waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
-			waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
-			waitingTicketJsonObjectTemp.setName(waitingTicket.getName());
-			waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
-			waitingTicketJsonObjectTemp.setCreateTime(waitingTicket.getCreateTime());
-			
-			waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
+			//유효한 티켓만 받아오
+			if(waitingTicket.getStatus() < 10) {
+				WaitingTicketJsonType waitingTicketJsonObjectTemp = new WaitingTicketJsonType();
+				
+				waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
+				waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
+				waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
+				waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
+				waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
+				waitingTicketJsonObjectTemp.setName(waitingTicket.getName());
+				waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
+				waitingTicketJsonObjectTemp.setCreateTime(waitingTicket.getCreateTime());
+				waitingTicketJsonObjectTemp.setStatus(waitingTicket.getStatus());
+				
+				waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
+			}
 		}
 
 		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
@@ -123,8 +128,18 @@ public class WaitingTicketController {
 		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
 
 		int ticketNum = waitingTicketJsonObject.getTicketNumber();
+		String status = waitingTicketJsonObject.getStatus();
+				
 		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);
-		rWaitingTicket.setDeleted(1);
+		System.out.println(rWaitingTicket);
+		if(status.equals("in")) { // 정상적으로 고객 입장 
+			rWaitingTicket.setStatus(10);
+		}else if(status.equals("customerCancel")) { // 고객의 취소 
+			rWaitingTicket.setStatus(11);
+		}else if(status.equals("cancel")) {// 가게 없주의 취소 
+			rWaitingTicket.setStatus(12);
+		}
+		
 		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
 		
 		return "true";
@@ -145,12 +160,18 @@ public class WaitingTicketController {
 		return objectMapper.writeValueAsString(rWaitingTicket);
 	}
 	
+	//모든 티켓 무효화 
 	public void deleteAllWaitingTicket(int storeId) throws Exception{
-		List<WaitingTicket> arr = waitingTicketService.findByWaitingListId(storeId);
+		System.out.println(storeId);
 		
-		for(WaitingTicket w : arr) {
-			w.setDeleted(1);
-			waitingTicketService.updateTicketByTicketNum(w);
+		//List<WaitingTicket> arr = waitingTicketService.findByWaitingListId(storeId);
+		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(storeId);		
+		if(!waitingTicketList.isEmpty()) {
+			for(WaitingTicket w : waitingTicketList) {
+				//수정필요 
+				w.setStatus(12);
+				waitingTicketService.updateTicketByTicketNum(w);
+			}			
 		}
 		
 	}
