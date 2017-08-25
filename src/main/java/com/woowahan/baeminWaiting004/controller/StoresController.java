@@ -322,6 +322,7 @@ public class StoresController {
 		String status = param.getStatus();
 		//store info get
 		Store rStore = storeService.getStoreInfoByMemberId(memberId);
+		WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
 
 		if(rStore != null) {
 			if(status.equals("on")) { //가게 오픈 대기 가능  
@@ -334,6 +335,8 @@ public class StoresController {
 						//수정필요 
 						w.setStatus(12);
 						waitingTicketService.updateTicketByTicketNum(w);
+						waitingList.setCurrentInLine(0);
+						waitingListService.updateWaitingList(waitingList);
 					}
 				}
 			}else if(status.equals("deny")) {// 가게 오픈 but 대기 신청 불가능, 기존 대기줄 유효

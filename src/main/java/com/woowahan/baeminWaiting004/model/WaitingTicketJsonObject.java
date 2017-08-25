@@ -10,6 +10,7 @@ public class WaitingTicketJsonObject {
 	private int ticketNumber;
 	private String status;
 	
+	
 	public int getTicketNumber() {
 		return ticketNumber;
 	}
@@ -52,6 +53,7 @@ public class WaitingTicketJsonObject {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+
 	@Override
 	public String toString() {
 		return "WaitingTicketJsonObject [name=" + name + ", storeId=" + storeId + ", headCount=" + headCount

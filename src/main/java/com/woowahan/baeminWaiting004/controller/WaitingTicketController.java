@@ -5,6 +5,8 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.hibernate.action.internal.EntityIdentityInsertAction;
@@ -15,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.woowahan.baeminWaiting004.model.CheckTicketJsonType;
+import com.woowahan.baeminWaiting004.model.MylineJsonObject;
 import com.woowahan.baeminWaiting004.model.Store;
+import com.woowahan.baeminWaiting004.model.TicketVaildJsonObject;
 import com.woowahan.baeminWaiting004.model.WaitingList;
 import com.woowahan.baeminWaiting004.model.WaitingTicket;
 import com.woowahan.baeminWaiting004.model.WaitingTicketJsonType;
@@ -64,10 +69,14 @@ public class WaitingTicketController {
 		waitingTicketService.addWaitingTicket(name, storeId, memberId, headCount, isStaying, phoneNumber, creatingTime);
 		
 		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
-		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
-		waitingList.setCurrentInLine(waitingTickets.size());
-		waitingListService.updateWaitingList(waitingList);
+		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+		for(int i=0; i<waitingTickets.size(); i++) {
+			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+		}
 		
+		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
+		waitingList.setCurrentInLine(filteredTickets.size());
+		waitingListService.updateWaitingList(waitingList);
 		
 		Store store = storeService.findByid(waitingList.getStoreId());
 		WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
@@ -129,9 +138,8 @@ public class WaitingTicketController {
 
 		int ticketNum = waitingTicketJsonObject.getTicketNumber();
 		String status = waitingTicketJsonObject.getStatus();
-				
+					
 		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);
-		System.out.println(rWaitingTicket);
 		if(status.equals("in")) { // 정상적으로 고객 입장 
 			rWaitingTicket.setStatus(10);
 		}else if(status.equals("customerCancel")) { // 고객의 취소 
@@ -139,10 +147,22 @@ public class WaitingTicketController {
 		}else if(status.equals("cancel")) {// 가게 없주의 취소 
 			rWaitingTicket.setStatus(12);
 		}
-		
 		waitingTicketService.updateTicketByTicketNum(rWaitingTicket);
 		
-		return "true";
+		WaitingList waitingList = waitingListService.findByWaitingListId(rWaitingTicket.getWaitingListId());
+		
+		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(rWaitingTicket.getWaitingListId());
+		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+		for(int i=0; i<waitingTickets.size(); i++) {
+			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+		}
+		waitingList.setCurrentInLine(filteredTickets.size());
+		waitingListService.updateWaitingList(waitingList);
+		
+		
+		int isSuccess = 1;
+			
+		return objectMapper.writeValueAsString(isSuccess);
 	}
 	
 	//티켓넘버로 디테일 가져오기 
@@ -151,111 +171,60 @@ public class WaitingTicketController {
 	public String getCustomerDetailByTicketNum(@RequestBody String waitingTicketJson) throws Exception{
 		ObjectMapper objectMapper = new ObjectMapper();
 		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
-
 		int ticketNum = waitingTicketJsonObject.getTicketNumber();
 		
-		//
 		WaitingTicket rWaitingTicket = waitingTicketService.findByTicketNumber(ticketNum);		
 		
 		return objectMapper.writeValueAsString(rWaitingTicket);
 	}
 	
-	//모든 티켓 무효화 
-	public void deleteAllWaitingTicket(int storeId) throws Exception{
-		System.out.println(storeId);
 		
-		//List<WaitingTicket> arr = waitingTicketService.findByWaitingListId(storeId);
-		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(storeId);		
-		if(!waitingTicketList.isEmpty()) {
-			for(WaitingTicket w : waitingTicketList) {
-				//수정필요 
-				w.setStatus(12);
-				waitingTicketService.updateTicketByTicketNum(w);
-			}			
-		}
+	
+	@RequestMapping(value="/validCheckTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String checkTicketValid(@RequestBody String validTicketJson) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		TicketVaildJsonObject ticketVaildJsonObject = objectMapper.readValue(validTicketJson, TicketVaildJsonObject.class);
 		
+		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketVaildJsonObject.getTicketNum());
+		int status = waitingTicket.getStatus();
+		
+		return objectMapper.writeValueAsString(status);
 	}
 	
-	
-//	@RequestMapping(value="/findByTicketNumber", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String findByTicketNumber(@RequestBody String waitingTicketJson) throws Exception{
-//		
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
-//		
-//		int ticketNumber = waitingTicketJsonObject.getTicketNumber();
-//		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketNumber);
-//		
-//		waitingTicketJsonObject.setWaitingListId(waitingTicket.getWaitingListId());
-//		waitingTicketJsonObject.setMemberId(waitingTicket.getMemberId());
-//		waitingTicketJsonObject.setHeadCount(waitingTicket.getHeadCount());
-//		waitingTicketJsonObject.setIsStaying(waitingTicket.getIsStaying());
-//		waitingTicketJsonObject.setContactNumber(waitingTicket.getContactNumber());
-//		
-//		return objectMapper.writeValueAsString(waitingTicketJsonObject);
-//	}
-//	
-//	@RequestMapping(value="/findByMemberId", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String findByMemberId(@RequestBody String waitingTicketJson) throws Exception{
-//		//파라미터 받기 
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);		
-//		String memberId = waitingTicketJsonObject.getMemberId();
-//		//디비 갔다오기 
-//		List<WaitingTicket> waitingTicketList = waitingTicketService.findByMemberId(memberId);
-//		
-//		//결과값 제이슨으로 바꾸
-//		List<WaitingTicketJsonObject> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonObject>();
-//		for(WaitingTicket waitingTicket : waitingTicketList) {
-//			WaitingTicketJsonObject waitingTicketJsonObjectTemp = new WaitingTicketJsonObject();
-//			waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
-//			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-//			waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
-//			waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
-//			waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
-//			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-//			waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
-//			waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
-//		}
-//		
-//		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
-//	}
-//	
-//	@RequestMapping(value="/findByWaitingListId", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String findByWaitingListId(@RequestBody String waitingTicketJson) throws Exception{
-//		//파라미터 받기 
-//		ObjectMapper objectMapper = new ObjectMapper();
-//		WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson,
-//				WaitingTicketJsonObject.class);
-//		int waitingListId= waitingTicketJsonObject.getWaitingListId();
-//		// 디비 갔다오기
-//		List<WaitingTicket> waitingTicketList = waitingTicketService.findByWaitingListId(waitingListId);
-//
-//		// 결과값 제이슨으로 바꾸
-//		List<WaitingTicketJsonObject> waitingTicketJsonObjectList = new ArrayList<WaitingTicketJsonObject>();
-//		for (WaitingTicket waitingTicket : waitingTicketList) {
-//			WaitingTicketJsonObject waitingTicketJsonObjectTemp = new WaitingTicketJsonObject();
-//			waitingTicketJsonObjectTemp.setTicketNumber(waitingTicket.getTicketNumber());
-//			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-//			waitingTicketJsonObjectTemp.setHeadCount(waitingTicket.getHeadCount());
-//			waitingTicketJsonObjectTemp.setIsStaying(waitingTicket.getIsStaying());
-//			waitingTicketJsonObjectTemp.setContactNumber(waitingTicket.getContactNumber());
-//			waitingTicketJsonObjectTemp.setMemberId(waitingTicket.getMemberId());
-//			waitingTicketJsonObjectTemp.setWaitingListId(waitingTicket.getWaitingListId());
-//			waitingTicketJsonObjectList.add(waitingTicketJsonObjectTemp);
-//		}
-//
-//		return objectMapper.writeValueAsString(waitingTicketJsonObjectList);
-//	}
-//	
-//	@RequestMapping(value="/getAllWaitingTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
-//	@ResponseBody
-//	public String getAllWaitingTicket(@RequestBody String waitingTicketJson) throws Exception{
-//	//to do		
-//		return null;
-//	}
-	
+	@RequestMapping(value="/mylineCheck", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+	@ResponseBody
+	public String checkMyline(@RequestBody String mylineJson) throws JsonParseException, JsonMappingException, IOException {
+		ObjectMapper objectMapper = new ObjectMapper();
+		MylineJsonObject mylineJsonObject = objectMapper.readValue(mylineJson, MylineJsonObject.class);
+		
+		int storeId = mylineJsonObject.getStoreId();
+		int ticketNumber = mylineJsonObject.getTicketNumber();
+		
+		List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
+		WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
+		waitingList.setCurrentInLine(waitingTickets.size());
+		waitingListService.updateWaitingList(waitingList);
+		
+		List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+		for(int i=0; i<waitingTickets.size(); i++) {
+			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+		}
+		
+		Store store = storeService.findByid(waitingList.getStoreId());
+		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketNumber);
+		CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
+		checkTicketJsonType.setIsSuccess(1);
+		checkTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+		int index = 1;
+		for(int i=0; i<filteredTickets.size(); i++) {
+			if (filteredTickets.get(i).getTicketNumber() == waitingTicket.getTicketNumber()) {break;} 
+			index++;
+		}
+		System.out.println(index);
+		checkTicketJsonType.setCurrentInLine(index);
+		checkTicketJsonType.setStoreName(store.getTitle());
+		
+		return objectMapper.writeValueAsString(checkTicketJsonType);
+	}
 }

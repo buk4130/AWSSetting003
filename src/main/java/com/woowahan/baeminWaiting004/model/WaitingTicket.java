@@ -32,7 +32,6 @@ public class WaitingTicket {
 	@Column(name="status")
 	private int status;
 
-
 	
 	public int getTicketNumber() {
 		return ticketNumber;
