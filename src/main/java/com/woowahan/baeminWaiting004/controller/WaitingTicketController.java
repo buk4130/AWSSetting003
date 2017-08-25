@@ -213,12 +213,6 @@ public class WaitingTicketController {
 			if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
 		}
 		
-//		Collections.sort(filteredTickets, new Comparator<WaitingTicket>() {
-//			public int compare(WaitingTicket ticket1, WaitingTicket ticket2) {
-//				return (ticket1.getTicketNumber() < ticket2.getTicketNumber()) ? -1: (ticket1.getTicketNumber() > ticket2.getTicketNumber()) ? 1:0;
-//			}
-//		});
-		
 		Store store = storeService.findByid(waitingList.getStoreId());
 		WaitingTicket waitingTicket = waitingTicketService.findByTicketNumber(ticketNumber);
 		CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
@@ -229,7 +223,6 @@ public class WaitingTicketController {
 			if (filteredTickets.get(i).getTicketNumber() == waitingTicket.getTicketNumber()) {break;} 
 			index++;
 		}
-		System.out.println(index);
 		checkTicketJsonType.setCurrentInLine(index);
 		checkTicketJsonType.setStoreName(store.getTitle());
 		
