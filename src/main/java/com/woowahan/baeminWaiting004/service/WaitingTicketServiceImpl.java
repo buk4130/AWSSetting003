@@ -44,10 +44,6 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 		return waitingTicketRepository.findByWaitingListId(waitingListId);
 	}
 	
-	@Override
-	public List<WaitingTicket> findByWaitingListIdAndDeleted(int waitingListId, int deleted) {
-		return waitingTicketRepository.findByWaitingListIdAndDeleted(waitingListId, deleted);
-	}
 
 	@Override
 	public List<WaitingTicket> getAllWaitingTicket() {
