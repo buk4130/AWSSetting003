@@ -291,7 +291,9 @@ public class StoresController {
 		rStore.setLatitude(storeLatitude);
 		rStore.setLongitude(storeLongitude);
 		
-		rStoreImg.setImgUrl(imgUrl);
+		if(imgUrl != null) {
+			rStoreImg.setImgUrl(imgUrl);			
+		}
 		
 		//remove all menu and save all again
 		menuService.removeMenuByStoreId(storeId);
@@ -322,7 +324,7 @@ public class StoresController {
 		String status = param.getStatus();
 		//store info get
 		Store rStore = storeService.getStoreInfoByMemberId(memberId);
-		WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
+		
 
 		if(rStore != null) {
 			if(status.equals("on")) { //가게 오픈 대기 가능  
@@ -335,6 +337,7 @@ public class StoresController {
 						//수정필요 
 						w.setStatus(12);
 						waitingTicketService.updateTicketByTicketNum(w);
+						WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
 						waitingList.setCurrentInLine(0);
 						waitingListService.updateWaitingList(waitingList);
 					}
