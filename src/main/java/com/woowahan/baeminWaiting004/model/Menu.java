@@ -15,10 +15,13 @@ public class Menu {
 	@GeneratedValue(strategy=GenerationType.IDENTITY) //auto increment일 경우
 	@Column(name="menu_id")
 	private int menuId;
+	
 	@Column(name="store_id")
 	private int storeId;
+	
 	@Column(name="name")
 	private String name;
+	
 	@Column(name="price")
 	private int price;
 	
@@ -39,6 +42,12 @@ public class Menu {
 	}
 	public void setPrice(int price) {
 		this.price = price;
+	}
+	public int getMenuId() {
+		return menuId;
+	}
+	public void setMenuId(int menuId) {
+		this.menuId = menuId;
 	}
 	
 	

@@ -64,6 +64,20 @@ public class WaitingTicketServiceImpl implements WaitingTicketService {
 		waitingTicketRepository.save(waitingTicket);
 	}	
 
-	
+	@Override
+	public void addWebWaitingTicket(String name, int waitingListId, String memberId, int headCount, int isStaying,
+			String contactNumber, String creatingTime, int status) {
+		WaitingTicket waitingTicket = new WaitingTicket();
+		
+		waitingTicket.setName(name);
+		waitingTicket.setWaitingListId(waitingListId);
+		waitingTicket.setMemberId(memberId);
+		waitingTicket.setHeadCount(headCount);
+		waitingTicket.setIsStaying(isStaying);
+		waitingTicket.setContactNumber(contactNumber);
+		waitingTicket.setCreateTime(creatingTime);
+		waitingTicket.setStatus(status);
+		waitingTicketRepository.save(waitingTicket);
+	}
 	
 }

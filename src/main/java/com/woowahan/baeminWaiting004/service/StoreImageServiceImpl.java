@@ -32,6 +32,13 @@ public class StoreImageServiceImpl implements StoreImageService {
 		storeImageRepository.save(storeImage);
 		
 	}
+
+	@Override
+	public void updateImg(StoreImage rStoreImg) {
+		storeImageRepository.save(rStoreImg);
+		
+	}
+	
 	
 	
 }

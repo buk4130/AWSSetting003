@@ -15,5 +15,5 @@ public interface WaitingTicketService {
 	List<WaitingTicket> findByWaitingListIdAndStatus(int waitingListId, int status);
 	
 	void updateTicketByTicketNum(WaitingTicket waitingTicket);
-	
+	void addWebWaitingTicket(String name, int waitingListId, String memberId, int headCount, int isStaying, String contactNumber, String creatingTime, int status);
 }
