@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsService;
 import com.woowahan.baeminWaiting004.model.CommonParamObject;
 import com.woowahan.baeminWaiting004.model.InnerMenu;
 import com.woowahan.baeminWaiting004.model.Member;
@@ -35,6 +37,7 @@ import com.woowahan.baeminWaiting004.service.MemberService;
 import com.woowahan.baeminWaiting004.service.MenuService;
 import com.woowahan.baeminWaiting004.service.StoreImageService;
 import com.woowahan.baeminWaiting004.service.StoreService;
+import com.woowahan.baeminWaiting004.service.TokenService;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
 import com.woowahan.baeminWaiting004.service.WaitingTicketService;
 
@@ -57,6 +60,9 @@ public class StoresController {
 	private WaitingTicketService waitingTicketService;
 	@Autowired
 	private MemberService memberService;
+	
+	@Autowired
+	private TokenService tokenService;
 	
 	@RequestMapping(value = "/stores", method = RequestMethod.GET, produces="text/plain;charset=UTF-8")
 	@ResponseBody
@@ -285,6 +291,7 @@ public class StoresController {
 		storeInfoJsonObject.setMemberName(rMember.getName());
 		storeInfoJsonObject.setMemberTel(rMember.getTel());
 		storeInfoJsonObject.setOpened(rStore.getOpened());
+		storeInfoJsonObject.setStoreId(rStore.getId());
 		
 		return objectMapper.writeValueAsString(storeInfoJsonObject);
 	}
@@ -400,6 +407,20 @@ public class StoresController {
 				if(!waitingTicketList.isEmpty()) {
 					for(WaitingTicket w : waitingTicketList) {
 						//수정필요 
+						
+						ApnsService apnsService = APNS.newService()
+								 //.withCert("/home/ubuntu/aps/baeminWaiting.p12", "waiting1234")
+								.withCert("/Users/woowabrothers/Workspace/Techfile/baeminWaiting.p12", "waiting1234")
+								.withSandboxDestination()
+								.build();
+								
+								String payload = APNS.newPayload().alertBody("죄송합니다. 식당의 사정으로 인하여 티켓을 취소하겠습니다. ").sound("default").build();
+								
+						if(w.getStatus() != 4 && w.getStatus() < 10) {
+								String token = tokenService.findByTicketNumber(w.getTicketNumber()).getToken();
+								
+								apnsService.push(token, payload);
+						}
 						w.setStatus(12);
 						waitingTicketService.updateTicketByTicketNum(w);
 						WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
