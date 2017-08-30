@@ -53,9 +53,11 @@ public class PushAlamiOSController {
 		.build();
 		
 		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPayload()).sound("default").build();
-		String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
+		if(null != tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum())) {
+			String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
 		
-		apnsService.push(token, payload);
+			apnsService.push(token, payload);
+		}
 	}
 	
 	//jw
@@ -72,10 +74,12 @@ public class PushAlamiOSController {
 		.build();
 		
 		String payload = APNS.newPayload().alertBody(pushAlarmJsonObject.getPayload()).sound("default").build();
-		String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
-		//티켓 상태 수정 기능 넣어야함 
+		if(null != tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum())) {
+			String token = tokenService.findByTicketNumber(pushAlarmJsonObject.getTicketNum()).getToken();
+			//티켓 상태 수정 기능 넣어야함 
+			apnsService.push(token, payload);
+		}	
 		
-		apnsService.push(token, payload);
 		
 		return "true";
 	}

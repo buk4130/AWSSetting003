@@ -10,4 +10,6 @@ public interface StoreImageService {
 	List<StoreImage> getAllStoresImage();
 	
 	void addImg(StoreImage storeImage);
+	
+	void updateImg(StoreImage rStoreImg);
 }

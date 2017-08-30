@@ -19,7 +19,7 @@ public class StoreInfoJsonObject {
 	private String memberTel;
 	private String memberName;
 	
-	
+
 	public int getStoreId() {
 		return storeId;
 	}

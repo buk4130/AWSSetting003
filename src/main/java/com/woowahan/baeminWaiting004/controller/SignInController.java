@@ -24,6 +24,7 @@ import com.woowahan.baeminWaiting004.model.Member;
 import com.woowahan.baeminWaiting004.model.SignInJsonObject;
 import com.woowahan.baeminWaiting004.model.Store;
 import com.woowahan.baeminWaiting004.model.TokenJsonType;
+import com.woowahan.baeminWaiting004.model.WebTokenJsonObject;
 import com.woowahan.baeminWaiting004.service.MemberService;
 import com.woowahan.baeminWaiting004.service.StoreService;
 

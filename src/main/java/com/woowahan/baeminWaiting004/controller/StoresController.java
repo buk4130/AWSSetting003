@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.notnoop.apns.APNS;
+import com.notnoop.apns.ApnsService;
 import com.woowahan.baeminWaiting004.model.CommonParamObject;
 import com.woowahan.baeminWaiting004.model.InnerMenu;
 import com.woowahan.baeminWaiting004.model.Member;
@@ -35,6 +37,7 @@ import com.woowahan.baeminWaiting004.service.MemberService;
 import com.woowahan.baeminWaiting004.service.MenuService;
 import com.woowahan.baeminWaiting004.service.StoreImageService;
 import com.woowahan.baeminWaiting004.service.StoreService;
+import com.woowahan.baeminWaiting004.service.TokenService;
 import com.woowahan.baeminWaiting004.service.WaitingListService;
 import com.woowahan.baeminWaiting004.service.WaitingTicketService;
 
@@ -57,6 +60,9 @@ public class StoresController {
 	private WaitingTicketService waitingTicketService;
 	@Autowired
 	private MemberService memberService;
+	
+	@Autowired
+	private TokenService tokenService;
 	
 	@RequestMapping(value = "/stores", method = RequestMethod.GET, produces="text/plain;charset=UTF-8")
 	@ResponseBody
@@ -134,13 +140,14 @@ public class StoresController {
 	
 	
 	//가게 등록 
-	//jw
+	//jw 0828
 	@RequestMapping(value = "/store", method = RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody
 	public String addStore(@RequestBody String storeJson) throws Exception{
 		
 		ObjectMapper objectMapper = new ObjectMapper();
 		StoreJsonType storeJsonType = objectMapper.readValue(storeJson, StoreJsonType.class);
+		
 		
 		String storeName = storeJsonType.getStoreName();
 		String storeAddress = storeJsonType.getStoreAddress();
@@ -154,36 +161,99 @@ public class StoresController {
 		
 		String storeIsOpened = "0";
 
-		//storeTB save
-		storeService.firstAddStore(storeName, storeTel, storeAddress, storeDescription, storeLatitude, storeLongitude, memberId);
-		
-		//get storeId
-		Store rStore = storeService.getStoreInfoByMemberId(memberId);
 		StoreIdJsonType storeIdJsonType = new StoreIdJsonType();
-		int rStoreId = rStore.getId();
+		int resultId = 0;
 		
-		//imgTB save by storeId
-		StoreImage storeImage = new StoreImage();
-		storeImage.setImgUrl(imgUrl);
-		storeImage.setStoreId(rStoreId);
-		storeImageService.addImg(storeImage);
-		
-		//menuTB save by storeId
-		ArrayList<Menu> pMenus = new ArrayList<Menu>();
-		for(InnerMenu i : menus) {
-			Menu tempMenu = new Menu();
-			tempMenu.setName(i.getName());
-			tempMenu.setPrice(i.getPrice());
-			tempMenu.setStoreId(rStoreId);
-			pMenus.add(tempMenu);
+		int storeId = storeJsonType.getStoreId();
+		if(storeId == 0) {//처음 가게 등록  
+			//storeTB save
+			storeService.firstAddStore(storeName, storeTel, storeAddress, storeDescription, storeLatitude, storeLongitude, memberId);
+			
+			//get storeId
+			Store rStore = storeService.getStoreInfoByMemberId(memberId);
+			
+			int rStoreId = rStore.getId();
+			
+			//imgTB save by storeId
+			StoreImage storeImage = new StoreImage();
+			
+			//jw 0828
+			if(imgUrl == null) {
+				System.out.println("null 이네 ");
+				imgUrl = "https://dl.dropboxusercontent.com/s/q4onwflw5q7fksk/default.png";
+			}
+			
+			storeImage.setImgUrl(imgUrl);
+			storeImage.setStoreId(rStoreId);
+			storeImageService.addImg(storeImage);
+			
+			//menuTB save by storeId
+			ArrayList<Menu> pMenus = new ArrayList<Menu>();
+			for(InnerMenu i : menus) {
+				Menu tempMenu = new Menu();
+				tempMenu.setName(i.getName());
+				tempMenu.setPrice(i.getPrice());
+				tempMenu.setStoreId(rStoreId);
+				pMenus.add(tempMenu);
+			}
+			menuService.addMenu(pMenus, rStoreId);
+			
+			//waitingList create
+			waitingListService.addWaitingList(rStoreId);
+			resultId = rStoreId;
+		} else if (storeId != 0) {//수정이라
+			//storeInfo 
+			Store rStore = storeService.getStoreInfoByMemberId(memberId);
+			//img info
+			StoreImage rStoreImg = storeImageService.findByStoreId(rStore.getId());
+			//menu info 
+			//ArrayList<Menu> rMenu = menuService.findByStoreId(rStore.getId());
+			
+			//rStore update
+			rStore.setTitle(storeName);
+			rStore.setAddress(storeAddress);
+			rStore.setTel(storeTel);
+			rStore.setDescription(storeDescription);
+			
+			if(storeLatitude != null && storeLongitude != null) {
+				rStore.setLatitude(storeLatitude);
+				rStore.setLongitude(storeLongitude);
+			}
+			storeService.updateStore(rStore.getTitle(), rStore.getTel(), rStore.getAddress(), rStore.getDescription(), rStore.getLatitude(), rStore.getLongitude(), memberId, storeId, rStore.getOpened());
+			
+			if(imgUrl != null) {
+				rStoreImg.setImgUrl(imgUrl);			
+			}
+			storeImageService.updateImg(rStoreImg);
+			
+			
+			System.out.println("이거 해얗");
+			//remove all menu and save all again
+			//menuService.removeMenuByStoreId(storeId);
+			ArrayList<Menu> rMenu = menuService.findByStoreId(storeId);
+			for(Menu m : rMenu) {
+				menuService.removeMenuOneByOne(m.getMenuId());
+			}
+			
+			System.out.println("dont be shy");
+			//menuTB save by storeId
+			ArrayList<Menu> pMenus = new ArrayList<Menu>();
+			for(InnerMenu i : menus) {
+				Menu tempMenu = new Menu();
+				tempMenu.setName(i.getName());
+				tempMenu.setPrice(i.getPrice());
+				tempMenu.setStoreId(storeId);
+				pMenus.add(tempMenu);
+			}
+			menuService.addMenu(pMenus, storeId);
+			resultId = rStore.getId();
+			
 		}
-		menuService.addMenu(pMenus, rStoreId);
 		
-		//waitingList create
-		waitingListService.addWaitingList(rStoreId);
+		
 		
 		//return storeId
-		storeIdJsonType.setStoreId(rStoreId);
+		storeIdJsonType.setStoreId(resultId);
 		return objectMapper.writeValueAsString(storeIdJsonType);
 	}
 	
@@ -193,7 +263,7 @@ public class StoresController {
 	public String getStoreInfo(@RequestBody String tokenJson) throws Exception{
 		ObjectMapper objectMapper = new ObjectMapper();
 		WebTokenJsonObject param = objectMapper.readValue(tokenJson, WebTokenJsonObject.class);
-		
+		System.out.println(param);
 		//id 꺼내기 
 		String memberId = param.getToken().getMemberId();
 		//storeInfo 
@@ -220,6 +290,8 @@ public class StoresController {
 		storeInfoJsonObject.setMemberId(memberId);
 		storeInfoJsonObject.setMemberName(rMember.getName());
 		storeInfoJsonObject.setMemberTel(rMember.getTel());
+		storeInfoJsonObject.setOpened(rStore.getOpened());
+		storeInfoJsonObject.setStoreId(rStore.getId());
 		
 		return objectMapper.writeValueAsString(storeInfoJsonObject);
 	}
@@ -335,6 +407,20 @@ public class StoresController {
 				if(!waitingTicketList.isEmpty()) {
 					for(WaitingTicket w : waitingTicketList) {
 						//수정필요 
+						
+						ApnsService apnsService = APNS.newService()
+								 //.withCert("/home/ubuntu/aps/baeminWaiting.p12", "waiting1234")
+								.withCert("/Users/woowabrothers/Workspace/Techfile/baeminWaiting.p12", "waiting1234")
+								.withSandboxDestination()
+								.build();
+								
+								String payload = APNS.newPayload().alertBody("죄송합니다. 식당의 사정으로 인하여 티켓을 취소하겠습니다. ").sound("default").build();
+								
+						if(w.getStatus() != 4 && w.getStatus() < 10) {
+								String token = tokenService.findByTicketNumber(w.getTicketNumber()).getToken();
+								
+								apnsService.push(token, payload);
+						}
 						w.setStatus(12);
 						waitingTicketService.updateTicketByTicketNum(w);
 						WaitingList waitingList = waitingListService.findByWaitingListId(rStore.getId());
@@ -392,5 +478,7 @@ public class StoresController {
 		
 		return null;
 	}
+	
+	
 	
 }

@@ -30,6 +30,14 @@ public class MenuServiceImpl implements MenuService {
 		menuRepository.delete(storeId);
 		
 	}
+
+	@Override
+	public void removeMenuOneByOne(int id) {
+		menuRepository.delete(id);
+		
+	}
+	
+	
 	
 	
 	

@@ -90,6 +90,51 @@ public class WaitingTicketController {
 		return objectMapper.writeValueAsString(checkTicketJsonType);
 	}
 	
+	//웹에서 티켓 발급한 경(param: fk waitingListId, memberId 꼭 필요 ) 
+		@RequestMapping(value="/addWebWaitingTicket", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
+		@ResponseBody
+		public String addWebWaitingTicket(@RequestBody String waitingTicketJson) throws Exception{
+			
+			ObjectMapper objectMapper = new ObjectMapper();
+			WaitingTicketJsonObject waitingTicketJsonObject = objectMapper.readValue(waitingTicketJson, WaitingTicketJsonObject.class);
+			
+			System.out.println(waitingTicketJsonObject);
+			String name = waitingTicketJsonObject.getName();
+			int storeId = waitingTicketJsonObject.getStoreId();
+			int headCount = waitingTicketJsonObject.getHeadCount();
+			int isStaying = waitingTicketJsonObject.getIsStaying();
+			String phoneNumber = waitingTicketJsonObject.getPhoneNumber();
+			String memberId = "";
+			
+			
+			Calendar calendar = Calendar.getInstance();
+	        SimpleDateFormat dayTime = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+	        String creatingTime = dayTime.format(calendar.getTime());
+			
+			waitingTicketService.addWebWaitingTicket(name, storeId, memberId, headCount, isStaying, phoneNumber, creatingTime, 4);
+			
+			List<WaitingTicket> waitingTickets = waitingTicketService.findByWaitingListId(storeId);
+			List<WaitingTicket> filteredTickets = new ArrayList<WaitingTicket>();
+			for(int i=0; i<waitingTickets.size(); i++) {
+				if(waitingTickets.get(i).getStatus() < 10) {filteredTickets.add(waitingTickets.get(i));}
+			}
+			
+			WaitingList waitingList = waitingListService.findByWaitingListId(storeId);
+			waitingList.setCurrentInLine(filteredTickets.size());
+			waitingListService.updateWaitingList(waitingList);
+			
+			Store store = storeService.findByid(waitingList.getStoreId());
+			WaitingTicket waitingTicket = waitingTicketService.findByCreateTime(creatingTime);
+			CheckTicketJsonType checkTicketJsonType = new CheckTicketJsonType();
+			checkTicketJsonType.setIsSuccess(1);
+			checkTicketJsonType.setTicketNumber(waitingTicket.getTicketNumber());
+			checkTicketJsonType.setCurrentInLine(waitingList.getCurrentInLine());
+			checkTicketJsonType.setStoreName(store.getTitle());
+			
+
+			return objectMapper.writeValueAsString(checkTicketJsonType);
+		}
+	
 	//가게에서 티켓 조회 받을때 기능(param: fk waitingListId 꼭 필요 ) 
 	@RequestMapping(value="/waitingList", method=RequestMethod.POST, produces="text/plain;charset=UTF-8")
 	@ResponseBody

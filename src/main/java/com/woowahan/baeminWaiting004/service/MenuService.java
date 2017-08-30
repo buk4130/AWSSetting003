@@ -9,4 +9,6 @@ public interface MenuService {
 	void addMenu(ArrayList<Menu> menus, int storeId);
 	ArrayList<Menu> findByStoreId(int storeId);
 	void removeMenuByStoreId(int storeId);
+	void removeMenuOneByOne(int id);
+	
 }
